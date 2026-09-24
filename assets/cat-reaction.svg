@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 320">
+  <rect width="420" height="320" rx="32" fill="#ffb9d6"/>
+  <path d="M140 102 L116 48 L176 80 Q210 66 244 80 L304 48 L280 102 Q306 132 306 178 Q306 242 210 244 Q114 242 114 178 Q114 132 140 102Z" fill="#f0e9e3"/>
+  <circle cx="173" cy="170" r="9" fill="#17131f"/>
+  <circle cx="247" cy="170" r="9" fill="#17131f"/>
+  <path d="M195 200 Q210 192 225 200" fill="none" stroke="#17131f" stroke-width="7" stroke-linecap="round"/>
+  <path d="M151 191 L94 178 M151 202 L92 209 M269 191 L326 178 M269 202 L328 209" stroke="#17131f" stroke-width="4" stroke-linecap="round"/>
+  <text x="210" y="286" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="800" fill="#17131f">NOPE.</text>
+</svg>

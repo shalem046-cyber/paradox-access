@@ -138,9 +138,25 @@
     'developer status: please do not inspect that button'
   ];
 
+  const thoughtJokes=[
+    'SYSTEM THOUGHT: the dog has seen your password.',
+    'SYSTEM THOUGHT: cat has requested admin privileges.',
+    'SYSTEM THOUGHT: everything is under control. probably.',
+    'SYSTEM THOUGHT: please do not type 1234 again.',
+    'SYSTEM THOUGHT: one of these buttons is suspicious.',
+    'SYSTEM THOUGHT: the developer said this was a good idea.',
+    'SYSTEM THOUGHT: your curiosity has been logged.'
+  ];
+
   function randomIdleJoke(){
     const joke=idleJokes[Math.floor(Math.random()*idleJokes.length)];
     toast(joke);
+  }
+
+  function rotateThought(){
+    const el=$('#serverThought');
+    if(!el)return;
+    el.textContent=thoughtJokes[Math.floor(Math.random()*thoughtJokes.length)];
   }
 
   function startLevel1(){
@@ -371,4 +387,6 @@
   document.addEventListener('keydown',handleCreatorKey);
 
   updateHud();unlockCards();$('#fakePlayers').textContent=18+Math.floor(Math.random()*16);
+  rotateThought();
+  setInterval(rotateThought,2600);
 })();

@@ -233,3 +233,86 @@ body.meme-panic .login-card{animation:panic .32s linear 3}
   html{scroll-behavior:auto}
   *,*:before,*:after{animation:none!important;transition:none!important}
 }
+
+
+/* =========================
+   LOGIN-ONLY PRESENTATION
+   ========================= */
+body{min-height:100vh}
+.login-only-header{background:rgba(13,11,24,.5);border-bottom:1px solid rgba(246,242,234,.08)}
+.login-only-header .brand{position:relative;z-index:12}
+.login-only-header .header-status{position:relative;z-index:12;margin-left:auto}
+.hidden-section{display:none!important}
+.login-section{
+  position:relative;
+  z-index:10;
+  min-height:calc(100vh - 78px);
+  display:flex!important;
+  align-items:center;
+  padding-top:38px;
+  padding-bottom:50px;
+}
+.login-layout{width:min(1040px,100%);margin:0 auto}
+.login-intro h2{font-size:clamp(52px,6vw,88px)}
+.login-card{backdrop-filter:blur(14px);background:rgba(23,19,43,.84)}
+.meme-bg{
+  position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:1;
+  background:
+    radial-gradient(circle at 50% 48%,rgba(140,123,255,.09),transparent 34%),
+    radial-gradient(circle at 18% 70%,rgba(255,122,184,.08),transparent 25%),
+    radial-gradient(circle at 82% 26%,rgba(185,255,98,.06),transparent 22%);
+}
+.bg-meme{
+  position:absolute;
+  width:220px;
+  border:1px solid rgba(246,242,234,.06);
+  background:rgba(255,255,255,.025);
+  border-radius:22px;
+  padding:12px;
+  opacity:.28;
+  filter:grayscale(.2) blur(.1px);
+  transform-origin:center;
+}
+.bg-meme img{width:100%;height:auto;border-radius:16px}
+.bg-meme span{
+  display:block;margin-top:8px;color:#c9bfce;text-align:center;
+  font:8px/1.35 'DM Mono',monospace;letter-spacing:.05em
+}
+.bg-meme-1{left:-35px;top:17%;transform:rotate(-11deg)}
+.bg-meme-2{right:-28px;top:11%;transform:rotate(10deg)}
+.bg-meme-3{left:9%;bottom:5%;transform:rotate(7deg)}
+.bg-meme-4{right:8%;bottom:2%;transform:rotate(-7deg)}
+.bg-text{
+  min-height:145px;display:grid;place-items:center;text-align:center;
+  color:#f6f2ea;font-size:24px;font-weight:800;line-height:.95;letter-spacing:-.05em
+}
+.bg-text small{
+  display:block;font:9px 'DM Mono',monospace;color:#a49aac;letter-spacing:.05em;
+  margin-top:6px
+}
+@keyframes bgFloat1{50%{transform:rotate(-9deg) translateY(-12px)}}
+@keyframes bgFloat2{50%{transform:rotate(8deg) translateY(10px)}}
+@keyframes bgFloat3{50%{transform:rotate(9deg) translateY(-8px)}}
+@keyframes bgFloat4{50%{transform:rotate(-9deg) translateY(9px)}}
+.bg-meme-1{animation:bgFloat1 7s ease-in-out infinite}
+.bg-meme-2{animation:bgFloat2 8s ease-in-out infinite}
+.bg-meme-3{animation:bgFloat3 9s ease-in-out infinite}
+.bg-meme-4{animation:bgFloat4 10s ease-in-out infinite}
+.login-section .creator-panel{margin-inline:auto;width:min(1040px,100%)}
+@media (max-width:980px){
+  .login-layout{grid-template-columns:1fr .95fr;gap:35px}
+}
+@media (max-width:720px){
+  .site-header{height:66px}
+  .login-section{min-height:calc(100vh - 66px);padding-top:24px;padding-bottom:30px}
+  .login-layout{grid-template-columns:1fr;gap:20px}
+  .login-intro h2{font-size:52px}
+  .login-intro>p{font-size:15px}
+  .login-tip{margin-top:20px}
+  .bg-meme{width:135px;opacity:.18}
+  .bg-meme-1{left:-42px;top:14%}
+  .bg-meme-2{right:-42px;top:20%}
+  .bg-meme-3{left:-28px;bottom:7%}
+  .bg-meme-4{right:-28px;bottom:3%}
+  .login-card{padding:22px}
+}

@@ -1,289 +1,207 @@
 (() => {
-  const state={
-    level:1,score:0,lives:3,time:30,timer:null,sound:true,
-    login:{target:'',input:'',attempts:0},
-    runner:{hits:0},
-    secret:{clicks:0,last:0,armed:false,index:0},
-    memory:{seq:[],input:[],round:1,busy:false}
-  };
-  const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-  const reactions=[
-    ['assets/dog-reaction.svg','bro... that was NOT it.'],
-    ['assets/cat-reaction.svg','cat has reviewed your decision.'],
-    ['assets/dog-reaction.svg','confidence: 100%. accuracy: 0%.'],
-    ['assets/cat-reaction.svg','the keyboard wants a lawyer.'],
-    ['assets/dog-reaction.svg','please stop speedrunning failure.']
+  const c=document.getElementById('game'),ctx=c.getContext('2d');
+  const $=s=>document.querySelector(s);
+  const keys={left:false,right:false,jump:false};
+  const world={w:4200,h:900,gravity:1850,groundY:735};
+  let view={x:0,y:0,scale:1};
+  let running=false,finished=false,startedAt=0,elapsed=0,last=0,deathCount=0,best=localStorage.getItem('paradoxRageBest')||'';
+  let soundOn=true,audioCtx=null;
+
+  const player={x:120,y:650,w:28,h:28,vx:0,vy:0,onGround:false,coyote:.0,jumpLock:false};
+  const checkpoints=[120,1420,2760,3920];
+  let checkpointIndex=0;
+
+  const platforms=[
+    {x:0,y:735,w:700,h:50},{x:820,y:680,w:320,h:40},{x:1210,y:610,w:250,h:35},
+    {x:1510,y:690,w:230,h:40},{x:1810,y:560,w:180,h:32},{x:2080,y:675,w:340,h:40},
+    {x:2530,y:620,w:170,h:32},{x:2810,y:550,w:250,h:34},{x:3160,y:680,w:270,h:40},
+    {x:3510,y:590,w:180,h:34},{x:3800,y:520,w:210,h:36},{x:4080,y:735,w:120,h:50}
   ];
-  const successLines=[
-    'okay. that was actually decent.',
-    'the system is mildly impressed.',
-    'you got through. suspicious.',
-    'fine. you can keep playing.'
+  const spikes=[
+    {x:560,y:700,w:100,h:35},{x:700,y:720,w:120,h:15},{x:1130,y:650,w:80,h:30},
+    {x:1450,y:580,w:60,h:30},{x:1740,y:650,w:70,h:40},{x:1990,y:520,w:90,h:40},
+    {x:2395,y:640,w:105,h:35},{x:2740,y:680,w:70,h:40},{x:3060,y:650,w:100,h:35},
+    {x:3420,y:650,w:80,h:30},{x:3690,y:550,w:100,h:40}
   ];
-  const audio={
-    ctx:null,
-    beep(freq=460,duration=.07,type='square'){
-      if(!state.sound)return;
-      try{
-        this.ctx??=new (window.AudioContext||window.webkitAudioContext)();
-        const o=this.ctx.createOscillator(),g=this.ctx.createGain();
-        o.type=type;o.frequency.value=freq;g.gain.value=.035;
-        o.connect(g);g.connect(this.ctx.destination);o.start();
-        g.gain.exponentialRampToValueAtTime(.0001,this.ctx.currentTime+duration);o.stop(this.ctx.currentTime+duration);
-      }catch{}
-    }
-  };
-
-  function fmt(n){return String(Math.max(0,n)).padStart(4,'0')}
-  function hud(){
-    $('#hudLevel').textContent=state.level>3?'WIN':String(state.level).padStart(2,'0');
-    $('#hudScore').textContent=fmt(state.score);
-    $('#hudLives').textContent='♥'.repeat(state.lives)+'♡'.repeat(3-state.lives);
-  }
-  function show(id){
-    $$('.screen').forEach(x=>x.classList.toggle('show',x.id===id));
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
-  function toast(t){
-    const x=$('#toast');x.textContent=t;x.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>x.classList.remove('show'),1800);
-  }
-  function meme(kind=0,text='bro...'){
-    const r=reactions[kind%reactions.length];
-    $('#popupImg').src=r[0];$('#popupTag').textContent='SYSTEM REACTION';$('#popupText').textContent=text||r[1];
-    const p=$('#memePopup');p.classList.remove('show');void p.offsetWidth;p.classList.add('show');
-  }
-  function soundPop(ok=true){audio.beep(ok?720:190,ok?.08:.13,ok?'sine':'sawtooth')}
-  function loseLife(reason){
-    state.lives=Math.max(0,state.lives-1);hud();soundPop(false);
-    if(state.lives===0){
-      toast('NO LIVES LEFT. THE DOG WINS.');
-      clearInterval(state.timer);
-      setTimeout(()=>restart(),700);
-      return true;
-    }
-    if(reason)meme(state.lives%reactions.length,reason);
-    return false;
-  }
-  function addScore(n){state.score+=n;hud()}
-  function setTimer(seconds,onZero){
-    clearInterval(state.timer);state.time=seconds;$('#timer').textContent=seconds;
-    state.timer=setInterval(()=>{
-      state.time--;$('#timer').textContent=state.time;
-      if(state.time<=5) $('#timer').style.color='var(--red)'; else $('#timer').style.color='var(--lime)';
-      if(state.time<=0){clearInterval(state.timer);onZero()}
-    },1000)
-  }
-  function start(){
-    state.level=1;state.score=0;state.lives=3;hud();loadLogin();show('game');startLevel(1)
-  }
-  function restart(){
-    clearInterval(state.timer);state.level=1;state.score=0;state.lives=3;state.runner.hits=0;state.memory.round=1;hud();show('home')
-  }
-  function finishLevel(){
-    clearInterval(state.timer);
-    const line=successLines[Math.floor(Math.random()*successLines.length)];
-    addScore(state.level===1?250:state.level===2?350:500);
-    toast(line);
-    soundPop(true);
-    setTimeout(()=>{
-      state.level++;
-      if(state.level>3){showWin();return}
-      hud();loadLevel(state.level)
-    },650)
-  }
-  function loadLevel(level){
-    show('game');
-    $('#levelEyebrow').textContent='LEVEL 0'+level;
-    $('#timer').style.color='var(--lime)';
-    if(level===1)loadLogin();
-    if(level===2)loadRunner();
-    if(level===3)loadMemory();
-  }
-
-  // LEVEL 1 — actual playable login code
-  const words=[
-    {word:'DOG26',hint:'dog + 26'},
-    {word:'CAT77',hint:'cat + 77'},
-    {word:'PAX26',hint:'pax + 26'},
-    {word:'LOL42',hint:'lol + 42'}
+  const movers=[
+    {x:735,y:610,w:75,h:22,min:710,max:805,s:1.8,t:0},
+    {x:1460,y:500,w:80,h:20,min:1430,max:1740,s:1.4,t:1.3},
+    {x:1990,y:455,w:82,h:20,min:1940,max:2320,s:1.7,t:2.1},
+    {x:2440,y:500,w:80,h:20,min:2400,max:2780,s:1.5,t:0.7},
+    {x:3010,y:540,w:75,h:20,min:2980,max:3260,s:1.7,t:1.5}
   ];
-  function loadLogin(){
-    $('#levelTitle').textContent='LOGIN PANIC';$('#levelDesc').textContent='Build the 5-character access code before the timer dies.';
-    state.login=words[Math.floor(Math.random()*words.length)];state.login.input='';state.login.attempts=0;state.secret={clicks:0,last:0,armed:false,index:0};
-    $('#stageMain').innerHTML=`
-      <div class="login-game">
-        <div class="login-card-big">
-          <div class="login-top"><span>ACCESS TERMINAL</span><span class="lime">ONLINE</span></div>
-          <div class="login-clue"><strong>${state.login.word.replace(/./g,'?')}</strong><span>CLUE: ${state.login.hint.toUpperCase()}</span></div>
-          <input class="code-input" id="codeInput" maxlength="5" placeholder="TYPE CODE" autocomplete="off" inputmode="text">
-          <div class="code-grid" id="codeGrid"></div>
-          <button class="hero-btn" id="codeSubmit" style="width:100%;margin-top:14px">CHECK LOGIN →</button>
-        </div>
-      </div>`;
-    const keys='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
-    $('#codeGrid').innerHTML=keys.map(k=>`<button class="code-key" data-k="${k}" type="button">${k}</button>`).join('');
-    $$('.code-key').forEach(b=>b.addEventListener('click',()=>{$('#codeInput').value=($('#codeInput').value+b.dataset.k).slice(0,5)}));
-    $('#codeSubmit').addEventListener('click',checkLogin);
-    $('#codeInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkLogin()});
-    $('#reactionImg').src='assets/dog-reaction.svg';$('#reactionText').textContent='the dog is pretending not to judge you.';
-    setTimer(30,()=>{if(!loseLife('time expired. the dog waited patiently.'))loadLogin()});
+  const fakeFloor=[{x:1090,y:705,w:90,h:18},{x:2405,y:590,w:110,h:16},{x:3430,y:600,w:90,h:16}];
+  const goal={x:4145,y:660,w:30,h:75};
+
+  function resize(){const d=devicePixelRatio||1;c.width=innerWidth*d;c.height=innerHeight*d;ctx.setTransform(d,0,0,d,0,0);view.scale=Math.min(innerWidth/1100,innerHeight/720);if(innerWidth<800)view.scale=Math.min(innerWidth/700,innerHeight/720)}
+  addEventListener('resize',resize);resize();
+
+  function beep(f=480,d=.06,type='square'){
+    if(!soundOn)return;
+    try{
+      audioCtx??=new (AudioContext||webkitAudioContext)();
+      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.type=type;o.frequency.value=f;g.gain.value=.025;o.connect(g);g.connect(audioCtx.destination);o.start();
+      g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+d);o.stop(audioCtx.currentTime+d)
+    }catch{}
   }
-  function checkLogin(){
-    const value=$('#codeInput').value.toUpperCase();
-    if(value===state.login.word){
-      $('#reactionImg').src='assets/cat-reaction.svg';$('#reactionText').textContent='cat: acceptable. continue.';
-      finishLevel();return;
-    }
-    state.login.attempts++;
-    const idx=Math.floor(Math.random()*reactions.length);
-    $('#reactionImg').src=reactions[idx][0];$('#reactionText').textContent=reactions[idx][1];
-    if(state.login.attempts>=3){
-      $('#loginDesc').textContent='DIRECT LOGIN LOCKED. The system may be hiding another route.';
-      toast('three bad ideas detected. maybe stop guessing.');
-    }
-    if(!loseLife(reactions[idx][1])){$('#codeInput').value='';}
+  function showMeme(kind,text){
+    $('#memeImg').src=kind?'assets/cat-reaction.svg':'assets/dog-reaction.svg';
+    $('#memeText').textContent=text;
+    const m=$('#meme');m.classList.remove('show');void m.offsetWidth;m.classList.add('show')
+  }
+  function timeText(ms){const s=ms/1000;return String(Math.floor(s/60)).padStart(2,'0')+':'+(s%60).toFixed(1).padStart(4,'0')}
+  function updateHud(){ $('#deaths').textContent=deathCount;$('#time').textContent=timeText(elapsed);$('#best').textContent=best?timeText(Number(best)):'--:--.-' }
+  function resizeWorldView(){
+    const targetX=player.x-innerWidth*.33/view.scale;
+    view.x=Math.max(0,Math.min(world.w-innerWidth/view.scale,targetX));
+    view.y=Math.max(0,Math.min(world.h-innerHeight/view.scale,world.h-innerHeight/view.scale));
   }
 
-  // LEVEL 2 — chase the button
-  function loadRunner(){
-    $('#levelTitle').textContent='RUNNING BUTTON';$('#levelDesc').textContent='Hit the green button 7 times. It will try to escape.';
-    state.runner.hits=0;
-    $('#stageMain').innerHTML=`
-      <div class="running-game" id="arena">
-        <div class="arena-note">TAP THE GREEN BUTTON • 7 HITS • DON'T CLICK THE TRAPS</div>
-        <button class="runner" id="runner">CLICK ME<small>again.</small></button>
-        <button class="trap t1" data-trap>not me</button>
-        <button class="trap t2" data-trap>definitely not me</button>
-        <div class="running-score">HITS <b id="runHits">0</b> / 7</div>
-      </div>`;
-    $('#reactionImg').src='assets/cat-reaction.svg';$('#reactionText').textContent='the cat is betting against you.';
-    $('#runner').addEventListener('click',hitRunner);
-    $$('[data-trap]').forEach(t=>t.addEventListener('click',()=>{if(!loseLife('you clicked a trap. impressive.'))toast('THAT WAS NOT THE BUTTON');}));
-    setTimer(20,()=>{if(!loseLife('time up. the button remains undefeated.'))loadRunner()});
+  function rectHit(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+  function solidAt(x,y,w,h){
+    const box={x,y,w,h};
+    let hit=null;
+    for(const p of platforms)if(rectHit(box,p))hit=p;
+    for(const m of movers)if(rectHit(box,m))hit=m;
+    return hit
   }
-  function hitRunner(){
-    state.runner.hits++;
-    $('#runHits').textContent=state.runner.hits;
-    addScore(35);soundPop(true);
-    if(state.runner.hits>=7){finishLevel();return}
-    const r=document.querySelector('#runner');
-    const arena=document.querySelector('#arena');
-    const maxX=arena.clientWidth-r.offsetWidth-18,maxY=arena.clientHeight-r.offsetHeight-45;
-    r.style.left=(18+Math.random()*Math.max(10,maxX))+'px';
-    r.style.top=(35+Math.random()*Math.max(10,maxY))+'px';
-    if(state.runner.hits===3)meme(1,'cat: why are you good at this?');
-    if(state.runner.hits===6)meme(0,'one more. do not fumble now.');
+  function onDanger(){
+    if(player.y>world.h+100)return true;
+    for(const s of spikes)if(rectHit(player,s))return true;
+    for(const f of fakeFloor)if(rectHit(player,f))return false;
+    return false
+  }
+  function respawn(reason){
+    deathCount++;updateHud();showMeme(deathCount%2,reason||'bro... you died.');
+    beep(150,.14,'sawtooth');
+    const x=checkpoints[Math.min(checkpointIndex,checkpoints.length-1)];
+    player.x=x;player.y=500;player.vx=0;player.vy=0;
+    running=true;
+    flash('#ff5f73');
   }
 
-  // LEVEL 3 — memory game
-  function loadMemory(){
-    $('#levelTitle').textContent='CAT MEMORY';$('#levelDesc').textContent='Watch the lights. Repeat the sequence.';
-    state.memory={seq:[],input:[],round:1,busy:false};
-    $('#stageMain').innerHTML=`
-      <div class="memory-game">
-        <div class="memory-info">
-          <div class="cat">=^.^=</div>
-          <h3>Remember this.</h3>
-          <p>The sequence gets longer. The cat will not give hints.</p>
-          <button class="hero-btn" id="memoryStart">START ROUND →</button>
-          <div class="memory-status" id="memoryStatus">waiting...</div>
-        </div>
-        <div class="memory-grid" id="memoryGrid">
-          ${Array.from({length:9},(_,i)=>`<button class="memory-tile" data-i="${i}" type="button"></button>`).join('')}
-        </div>
-      </div>`;
-    $('#reactionImg').src='assets/cat-reaction.svg';$('#reactionText').textContent='cat memory department is open.';
-    $('#memoryStart').addEventListener('click',memoryStart);$$('.memory-tile').forEach(t=>t.addEventListener('click',memoryClick));
-    setTimer(35,()=>{if(!loseLife('time up. memory rejected.'))loadMemory()});
-  }
-  function memoryStart(){
-    if(state.memory.busy)return;
-    state.memory.seq=Array.from({length:3+state.memory.round},()=>Math.floor(Math.random()*9));
-    state.memory.input=[];state.memory.busy=true;
-    $('#memoryStatus').textContent='WATCH...';
-    const tiles=$$('.memory-tile');
-    state.memory.seq.forEach((idx,i)=>{
-      setTimeout(()=>{tiles[idx].classList.add('lit');soundPop(true)},450*i+150);
-      setTimeout(()=>tiles[idx].classList.remove('lit'),450*i+350);
-    });
-    setTimeout(()=>{state.memory.busy=false;$('#memoryStatus').textContent='YOUR TURN';},450*state.memory.seq.length+480);
-  }
-  function memoryClick(e){
-    if(state.memory.busy||!state.memory.seq.length)return;
-    const idx=Number(e.currentTarget.dataset.i);
-    const pos=state.memory.input.length;
-    state.memory.input.push(idx);e.currentTarget.classList.add('hit');setTimeout(()=>e.currentTarget.classList.remove('hit'),120);
-    if(idx!==state.memory.seq[pos]){
-      e.currentTarget.classList.add('bad');setTimeout(()=>e.currentTarget.classList.remove('bad'),300);
-      state.memory.seq=[];$('#memoryStatus').textContent='WRONG. cat has no comment.';
-      if(!loseLife('cat memory says: absolutely not.'))loadMemory();
-      return;
-    }
-    if(state.memory.input.length===state.memory.seq.length){
-      addScore(75);state.memory.round++;
-      if(state.memory.round>3){finishLevel();return}
-      state.memory.seq=[];$('#memoryStatus').textContent='CORRECT. NEXT ROUND.';
-      setTimeout(memoryStart,650);
-    }
+  function flash(color){
+    const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;pointer-events:none;background:'+color+';opacity:.16;z-index:17';document.body.appendChild(d);
+    setTimeout(()=>d.remove(),130)
   }
 
-  function showWin(){
-    state.level=4;hud();show('win');$('#winScore').textContent=fmt(state.score);$('#winLives').textContent='♥'.repeat(state.lives)+'♡'.repeat(3-state.lives);
-    $('#winText').textContent=state.score>900?'Okay. That was suspiciously good.':state.score>600?'Not bad. The cat approves.':'You survived. We are counting that as a win.';
+  function updateMover(m,dt){
+    m.t+=dt*m.s;
+    const mid=(m.min+m.max)/2,range=(m.max-m.min)/2;
+    m.x=mid+Math.sin(m.t)*range
   }
-
-  $('#startBtn').addEventListener('click',start);
-  $('#rulesBtn').addEventListener('click',()=>show('rules'));
-  $('#rulesBack').addEventListener('click',()=>show('home'));
-  $('#againBtn').addEventListener('click',start);
-  $('#soundBtn').addEventListener('click',()=>{state.sound=!state.sound;$('#soundBtn').textContent=state.sound?'🔊':'🔇';audio.beep(600,.05)});
-  $('#copyBtn').addEventListener('click',async()=>{const t='I scored '+state.score+' in PARADOX//ACCESS.';try{await navigator.clipboard.writeText(t);toast('RESULT COPIED');}catch{toast(t)}});
-  $('#logo').addEventListener('click',()=> {
-    if(state.level!==1 || state.login.attempts<3) {
-      toast('the logo is innocent. probably.');
-      return;
-    }
-    const now=Date.now();
-    if(now-state.secret.last>1400) state.secret.clicks=0;
-    state.secret.last=now;
-    state.secret.clicks++;
-    if(state.secret.clicks===1) toast('...the logo blinked.');
-    if(state.secret.clicks===2) toast('that was suspicious.');
-    if(state.secret.clicks===3) toast('one more signal.');
-    if(state.secret.clicks>3){state.secret.clicks=0;toast('channel reset.');}
-  });
-
-  document.addEventListener('click',e=>{
-    if(state.level!==1 || state.login.attempts<3 || state.secret.clicks!==3 || state.secret.armed) return;
-    if(e.shiftKey && e.target.closest('#logo')){
-      state.secret.armed=true;
-      state.secret.index=0;
-      toast('creator channel armed.');
-    }
-  });
-
-  document.addEventListener('keydown',e=>{
-    if(!state.secret.armed || state.level!==1) return;
-    const secret='PAX26';
-    const k=e.key.toUpperCase();
-    if(k===secret[state.secret.index]){
-      state.secret.index++;
-      if(state.secret.index===secret.length){
-        state.secret.armed=false;
-        state.login.attempts=0;
-        $('#reactionImg').src='assets/dog-reaction.svg';
-        $('#reactionText').textContent='HOW DID YOU FIND THE BACK DOOR?';
-        addScore(600);
-        meme(0,'creator route unlocked. okay, boss.');
-        finishLevel();
+  function resolvePlatforms(prevY){
+    player.onGround=false;
+    const bottoms=[];
+    for(const p of platforms)bottoms.push(p);
+    for(const m of movers)bottoms.push(m);
+    for(const p of bottoms){
+      const prevBottom=prevY+player.h;
+      const nowBottom=player.y+player.h;
+      if(player.x+player.w>p.x&&player.x<p.x+p.w&&prevBottom<=p.y&&nowBottom>=p.y&&player.vy>=0){
+        player.y=p.y-player.h;player.vy=0;player.onGround=true;player.coyote=.09
       }
-      return;
     }
-    if(!['SHIFT','ALT','CONTROL'].includes(k)){
-      state.secret.armed=false;state.secret.index=0;
-      toast('creator signal mismatch.');
+  }
+  function update(dt){
+    if(!running||finished)return;
+    elapsed=performance.now()-startedAt;updateHud();
+    movers.forEach(m=>updateMover(m,dt));
+    const accel=keys.left?-1150:keys.right?1150:0;
+    player.vx+=accel*dt;
+    if(!keys.left&&!keys.right)player.vx*=Math.pow(.0001,dt);
+    player.vx=Math.max(-320,Math.min(320,player.vx));
+    if((keys.jump||jumpPressed)&&player.onGround&&!player.jumpLock){player.vy=-650;player.onGround=false;player.jumpLock=true;beep(560,.05)}
+    if(!keys.jump)player.jumpLock=false;
+    jumpPressed=false;
+    player.vy+=world.gravity*dt;
+    const prevY=player.y;
+    player.x+=player.vx*dt;
+    player.y+=player.vy*dt;
+    resolvePlatforms(prevY);
+    if(player.onGround&&player.x>checkpoints[Math.min(checkpointIndex+1,checkpoints.length-1)]-80)checkpointIndex=Math.min(checkpointIndex+1,checkpoints.length-1);
+    if(player.x>goal.x-120&&checkpointIndex<3)checkpointIndex=3;
+    if(onDanger())respawn();
+    if(rectHit(player,goal)){finish()}
+    resizeWorldView()
+  }
+
+  function draw(){
+    const W=innerWidth,H=innerHeight;
+    ctx.clearRect(0,0,W,H);
+    ctx.save();ctx.scale(view.scale,view.scale);ctx.translate(-view.x,-view.y);
+    // world background
+    ctx.fillStyle='#080811';ctx.fillRect(0,0,world.w,world.h);
+    for(let x=0;x<world.w;x+=140){ctx.strokeStyle='rgba(255,255,255,.035)';ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,world.h);ctx.stroke()}
+    for(let y=0;y<world.h;y+=90){ctx.strokeStyle='rgba(255,255,255,.028)';ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(world.w,y);ctx.stroke()}
+    // background labels
+    ctx.font='10px DM Mono, monospace';ctx.fillStyle='rgba(255,255,255,.12)';
+    ['GOOD LUCK','THIS PART SUCKS','NO CHECKPOINT? LOL','ALMOST THERE','LIAR'].forEach((t,i)=>ctx.fillText(t,550+i*870,100+(i%2)*80));
+    // platforms
+    platforms.forEach(p=>{ctx.fillStyle='#191731';ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='#26224a';ctx.fillRect(p.x,p.y,p.w,4)});
+    movers.forEach(p=>{ctx.fillStyle='#203348';ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='#68dfff';ctx.fillRect(p.x,p.y,p.w,3)});
+    // fake floors
+    fakeFloor.forEach(p=>{ctx.fillStyle='#a65f7c';ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='#ff7db6';ctx.fillRect(p.x,p.y,p.w,2)});
+    // spikes
+    spikes.forEach(s=>{ctx.fillStyle='#ff5f73';const n=Math.max(1,Math.floor(s.w/20));const sw=s.w/n;for(let i=0;i<n;i++){ctx.beginPath();ctx.moveTo(s.x+i*sw,s.y+s.h);ctx.lineTo(s.x+i*sw+sw/2,s.y);ctx.lineTo(s.x+(i+1)*sw,s.y+s.h);ctx.closePath();ctx.fill()}});
+    // checkpoint flags
+    checkpoints.forEach((x,i)=>{if(i>checkpointIndex)return;ctx.fillStyle='#c9ff67';ctx.fillRect(x,650,3,85);ctx.fillStyle='#c9ff67';ctx.beginPath();ctx.moveTo(x,650);ctx.lineTo(x+36,660);ctx.lineTo(x,670);ctx.closePath()});
+    // goal
+    ctx.fillStyle='#c9ff67';ctx.fillRect(goal.x,goal.y,goal.w,goal.h);ctx.fillStyle='#111';ctx.font='12px Space Grotesk';ctx.fillText('EXIT',goal.x-3,goal.y-12);
+    // player
+    ctx.shadowColor='rgba(201,255,103,.4)';ctx.shadowBlur=16;ctx.fillStyle='#f8f4ee';ctx.fillRect(player.x,player.y,player.w,player.h);ctx.shadowBlur=0;
+    ctx.fillStyle='#111';ctx.fillRect(player.x+6,player.y+7,5,5);ctx.fillRect(player.x+17,player.y+7,5,5);
+    ctx.restore();
+    if(innerWidth>800){
+      ctx.fillStyle='rgba(255,255,255,.32)';ctx.font='9px DM Mono,monospace';ctx.fillText('MOVE  ← → / A D     JUMP  SPACE / W',18,innerHeight-18)
     }
+  }
+
+  let jumpPressed=false;
+  function key(e,down){
+    if(['ArrowLeft','a','A'].includes(e.key))keys.left=down;
+    if(['ArrowRight','d','D'].includes(e.key))keys.right=down;
+    if([' ','ArrowUp','w','W'].includes(e.key)){keys.jump=down;if(down)jumpPressed=true}
+    if(down&&e.key==='r')restartGame();
+  }
+  addEventListener('keydown',e=>{key(e,true);if(['ArrowLeft','ArrowRight','ArrowUp',' '].includes(e.key))e.preventDefault()});
+  addEventListener('keyup',e=>key(e,false));
+
+  document.querySelectorAll('.touch-btn').forEach(btn=>{
+    const k=btn.dataset.key;
+    const down=e=>{e.preventDefault();if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='jump'){keys.jump=true;jumpPressed=true}};
+    const up=e=>{e.preventDefault();if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='jump')keys.jump=false};
+    btn.addEventListener('touchstart',down,{passive:false});btn.addEventListener('touchend',up,{passive:false});btn.addEventListener('touchcancel',up,{passive:false});
+    btn.addEventListener('mousedown',down);btn.addEventListener('mouseup',up);btn.addEventListener('mouseleave',up)
   });
 
-  hud();
+  function startGame(){
+    $('#intro').style.display='none';$('#finish').style.display='none';deathCount=0;checkpointIndex=0;elapsed=0;finished=false;
+    player.x=120;player.y=650;player.vx=0;player.vy=0;startedAt=performance.now();running=true;updateHud();beep(650,.08)
+  }
+  function finish(){
+    if(finished)return;finished=true;running=false;clearInterval(stateTimer);
+    const t=elapsed;const old=best?Number(best):Infinity;
+    if(t<old){best=String(t);localStorage.setItem('paradoxRageBest',best)}
+    $('#finishDeaths').textContent=deathCount;$('#finishTime').textContent=timeText(t);
+    $('#finishText').textContent=deathCount===0?'0 deaths. The system is concerned.':deathCount<5?'Only '+deathCount+' deaths. Respectable.' : 'You died '+deathCount+' times and still won. That is the spirit.';
+    $('#finish').style.display='grid';updateHud();beep(880,.15,'sine')
+  }
+  function restartGame(){
+    $('#finish').style.display='none';$('#intro').style.display='none';startGame()
+  }
+
+  let stateTimer=null;
+  $('#start').addEventListener('click',startGame);
+  $('#again').addEventListener('click',restartGame);
+  $('#restart').addEventListener('click',restartGame);
+  $('#sound').addEventListener('click',()=>{soundOn=!soundOn;$('#sound').textContent=soundOn?'🔊':'🔇';});
+  addEventListener('blur',()=>{keys.left=keys.right=keys.jump=false});
+  window.addEventListener('beforeunload',()=>{if(best)localStorage.setItem('paradoxRageBest',best)});
+
+  function loop(t){
+    const dt=Math.min(.032,(t-last)/1000||0);last=t;update(dt);draw();requestAnimationFrame(loop)
+  }
+  updateHud();requestAnimationFrame(loop)
 })();

@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#05070b" />
   <title>PARADOX//ACCESS</title>
-  <link rel="stylesheet" href="style.css?v=3" />
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
 <body>
   <div class="noise"></div>
   <div class="scanline"></div>
+  <div id="fx"></div>
 
   <header class="topbar">
     <button id="statusDot" class="status-dot" aria-label="System status"></button>
@@ -21,6 +22,7 @@
   </header>
 
   <main>
+    <!-- LEVEL 0: LOGIN TRAP -->
     <section id="login" class="screen active">
       <div class="hero">
         <div class="eyebrow">AUTHENTICATION LAYER // 01</div>
@@ -30,12 +32,11 @@
           It wants to know whether you understand the interface.
         </p>
 
-        <div class="terminal">
+        <div class="terminal" id="authTerminal">
           <div class="terminal-head">
             <span>SECURE ACCESS TERMINAL</span>
             <span id="signal">● OFFLINE</span>
           </div>
-
           <div class="terminal-body">
             <label for="accessId">ACCESS ID</label>
             <input id="accessId" autocomplete="off" placeholder="ENTER ACCESS ID" />
@@ -70,50 +71,67 @@
       </div>
     </section>
 
+    <!-- TRANSITION -->
     <section id="welcome" class="screen centered">
       <div class="eyebrow">CREATOR CHANNEL ACCEPTED</div>
       <h2>YOU FOUND THE<br><span>WAY IN.</span></h2>
       <p id="welcomeText"></p>
-      <button id="enterExperience" class="access-btn compact">ENTER SYSTEM</button>
+      <div class="warning-strip">WARNING: ACCESS DOES NOT MEAN CONTROL.</div>
+      <button id="enterGame" class="access-btn compact">ENTER PARADOX</button>
     </section>
 
-    <section id="experience" class="screen">
-      <div class="experience-shell">
-        <div class="eyebrow">SYSTEM INTERFACE // 02</div>
-        <h2>The login was the first puzzle.</h2>
-        <p class="lead small">
-          There is no dashboard. There is only a system that expects you to look closer.
-        </p>
+    <!-- MAIN GAME -->
+    <section id="game" class="screen">
+      <div class="game-shell">
+        <div class="game-top">
+          <div>
+            <div class="eyebrow" id="stageEyebrow">PARADOX CHAMBER // 01</div>
+            <h2 id="stageTitle">BOOT SEQUENCE</h2>
+            <p id="stageDescription" class="lead small"></p>
+          </div>
 
-        <div class="cards">
-          <article class="card">
-            <span>01</span>
-            <h3>THE OBVIOUS</h3>
-            <p>Credentials are exactly where you expect them to be.</p>
-          </article>
-          <article class="card">
-            <span>02</span>
-            <h3>THE UNEXPECTED</h3>
-            <p>The terminal reacts to attention, not just input.</p>
-          </article>
-          <article class="card">
-            <span>03</span>
-            <h3>THE PARADOX</h3>
-            <p>The system says access is impossible. Yet you are already inside.</p>
-          </article>
+          <div class="hud">
+            <div><span>STAGE</span><strong id="stageCount">1 / 6</strong></div>
+            <div><span>SCORE</span><strong id="score">0000</strong></div>
+            <div><span>LIVES</span><strong id="lives">♥♥♥</strong></div>
+            <div><span>TIME</span><strong id="gameTimer">08:00</strong></div>
+          </div>
         </div>
 
-        <div class="system-log">
-          <div>&gt; authentication layer ............ BYPASSED</div>
-          <div>&gt; user assumption .................. REJECTED</div>
-          <div>&gt; curiosity ........................ ACCEPTED</div>
-          <div>&gt; paradox state .................... ACTIVE</div>
+        <div class="progress-track"><div id="progressBar"></div></div>
+
+        <div class="game-grid">
+          <div class="game-panel main-panel" id="gamePanel"></div>
+
+          <aside class="side-stack">
+            <div class="side-panel">
+              <div class="side-head"><span>RECENT EVENTS</span><span>LIVE</span></div>
+              <div id="eventLog" class="event-log"></div>
+            </div>
+
+            <div class="side-panel">
+              <div class="side-head"><span>SYSTEM MOOD</span><span id="moodValue">CALM</span></div>
+              <div class="mood-track"><div id="moodBar"></div></div>
+              <p id="moodText">The system is pretending to cooperate.</p>
+            </div>
+
+            <button id="panicBtn" class="panic-btn">REQUEST HINT <span>-15 SEC</span></button>
+          </aside>
         </div>
       </div>
+    </section>
+
+    <!-- ENDING -->
+    <section id="ending" class="screen centered">
+      <div class="eyebrow">PARADOX // COMPLETE</div>
+      <h2 id="endingTitle">SYSTEM OVERRIDDEN.</h2>
+      <p id="endingText"></p>
+      <div id="endingStats" class="ending-stats"></div>
+      <button id="replayBtn" class="access-btn compact">RUN AGAIN</button>
     </section>
   </main>
 
   <div id="toast" class="toast"></div>
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=4"></script>
 </body>
 </html>

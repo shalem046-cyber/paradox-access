@@ -23,7 +23,7 @@
 
   const $=s=>document.querySelector(s);
   const $$=s=>[...document.querySelectorAll(s)];
-  const creatorKey=atob('UEFYMjY=');
+  const creatorCode=atob('UEFYMjY=');
 
   const audio={
     ctx:null,
@@ -299,13 +299,13 @@
     }
   }
 
-  function creatorKey(e){
+  function handleCreatorKey(e){
     if(!state.creatorArmed||state.screen!=='loginLevel')return;
     const key=e.key.length===1?e.key.toUpperCase():e.key.toUpperCase();
-    if(key===creatorKey[state.creatorIndex]){
+    if(key===creatorCode[state.creatorIndex]){
       state.creatorIndex++;
       $('#loginOutput').className='terminal-output good';
-      $('#loginOutput').textContent='> creator signal '+state.creatorIndex+'/'+creatorKey.length;
+      $('#loginOutput').textContent='> creator signal '+state.creatorIndex+'/'+creatorCode.length;
       if(state.creatorIndex===creatorKey.length){
         state.creatorArmed=false;loginWin('ARCHITECT');meme('assets/dog-reaction.svg','HOW DID YOU EVEN FIND THIS?');
       }
@@ -348,7 +348,7 @@
   $$('[data-back]').forEach(b=>b.addEventListener('click',()=>{clearInterval(state.levelTimer);showScreen('lobbyScreen')}));
   $('.brand-chip').addEventListener('click',creatorLogoClick);
   document.addEventListener('click',e=>{if(e.target.closest('.brand-chip'))return;if(state.screen==='loginLevel')creatorSystem(e)});
-  document.addEventListener('keydown',creatorKey);
+  document.addEventListener('keydown',handleCreatorKey);
 
   updateHud();unlockCards();$('#fakePlayers').textContent=18+Math.floor(Math.random()*16);
 })();

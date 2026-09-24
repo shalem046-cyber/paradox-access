@@ -86,3 +86,24 @@ input::placeholder{color:#42556c}
   50%{transform:translateY(-3px)}
 }
 .access-btn.troll-hover{animation:tinyHop .22s ease}
+
+/* =========================
+   PARADOX MAXIMUM FRUSTRATION
+   ========================= */
+.patience-panel{margin-top:16px;padding-top:12px;border-top:1px solid #172635}
+.patience-head{display:flex;justify-content:space-between;color:#53677c;font:9px monospace;letter-spacing:.08em;margin-bottom:7px}
+#patienceText{color:var(--cyan)}
+.patience-track{height:4px;background:#0c141d;border:1px solid #18293a;overflow:hidden}
+#patienceBar{height:100%;width:100%;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width .2s ease,background .2s ease}
+#intruderLine{transition:color .2s ease}
+.paradox-chaos{animation:chaosShake .18s linear 2}
+@keyframes chaosShake{
+  20%{transform:translate(4px,-2px) rotate(.2deg)}
+  40%{transform:translate(-5px,2px) rotate(-.25deg)}
+  60%{transform:translate(3px,1px)}
+  80%{transform:translate(-2px,-1px)}
+}
+.field-hunted{box-shadow:0 0 0 1px rgba(255,99,123,.38),0 0 28px rgba(255,99,123,.07)}
+.button-hunted{box-shadow:0 0 0 1px rgba(255,200,110,.32),0 0 32px rgba(255,200,110,.09)}
+.decoy-overlay{position:fixed;inset:0;z-index:35;pointer-events:none;background:radial-gradient(circle at var(--cx,50%) var(--cy,50%),rgba(114,233,255,.06),transparent 22%);opacity:0;transition:opacity .12s}
+.decoy-overlay.active{opacity:1}

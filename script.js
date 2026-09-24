@@ -31,6 +31,125 @@
     $("#lockState").textContent = state.locked ? "LOCK: SEALED" : "LOCK: OPEN";
   }
 
+  // =========================
+  // FRUSTRATION ENGINE
+  // Intentionally annoying, always recoverable.
+  // =========================
+  const troll = {
+    idDodges: 0,
+    passDodges: 0,
+    buttonDodges: 0,
+    fakeChecks: 0,
+    lastMove: 0
+  };
+
+  const trollMessages = [
+    "That field moved. You definitely saw that.",
+    "Excellent click. Completely useless.",
+    "The interface has decided it dislikes you.",
+    "Please remain calm. The interface will not.",
+    "Your confidence is noted and ignored.",
+    "Almost. Emotionally, at least.",
+    "The system would like you to try something less reasonable."
+  ];
+
+  function trollMessage(index = Math.floor(Math.random() * trollMessages.length), type = ""){
+    feedback(trollMessages[index % trollMessages.length], type);
+  }
+
+  function dodge(el, intensity = 1){
+    if(state.locked || state.unlocked) return;
+
+    const now = Date.now();
+    if(now - troll.lastMove < 120) return;
+    troll.lastMove = now;
+
+    const x = Math.round((Math.random() * 2 - 1) * (45 + intensity * 12));
+    const y = Math.round((Math.random() * 2 - 1) * (10 + intensity * 5));
+
+    el.classList.remove("troll-move");
+    void el.offsetWidth;
+    el.classList.add("troll-move");
+    el.style.transform = "translate(" + x + "px," + y + "px)";
+    el.classList.add("troll-dodge");
+    setTimeout(() => {
+      if(!state.locked && !state.unlocked){
+        el.style.transform = "translate(0,0)";
+      }
+    }, 700);
+  }
+
+  function trollFieldFocus(el, kind){
+    if(state.locked || state.unlocked) return;
+
+    if(kind === "id"){
+      troll.idDodges++;
+      if(troll.idDodges <= 7){
+        dodge(el, troll.idDodges);
+        const messages = [
+          "ACCESS ID selected. Unfortunately, it moved.",
+          "You found the username field. It found a new location.",
+          "The ACCESS ID has requested personal space.",
+          "Stop chasing the box. The box is faster."
+        ];
+        feedback(messages[(troll.idDodges - 1) % messages.length], "bad");
+      }
+    } else {
+      troll.passDodges++;
+      if(troll.passDodges <= 5){
+        dodge(el, troll.passDodges);
+        const messages = [
+          "PASSCODE field unavailable due to mysterious reasons.",
+          "Password box moved. Security is apparently athletic.",
+          "Correct field. Wrong universe."
+        ];
+        feedback(messages[(troll.passDodges - 1) % messages.length], "bad");
+      }
+    }
+  }
+
+  function fakeValidate(){
+    if(state.locked || state.unlocked) return;
+
+    const id = $("#accessId");
+    const pass = $("#passcode");
+    const idValue = id.value.trim();
+    const passValue = pass.value.trim();
+
+    if(!idValue && !passValue){
+      feedback("You entered absolutely nothing. Bold strategy.");
+      dodge(id, 2);
+      return;
+    }
+
+    troll.fakeChecks++;
+    const terminal = document.querySelector(".terminal");
+    terminal.classList.add("troll-glitch");
+
+    if(idValue.length >= 3 && passValue.length >= 3){
+      feedback("credentials accepted... wait...", "ok");
+      setTimeout(() => {
+        if(!state.locked && !state.unlocked){
+          feedback("Nope. The system changed its mind.", "bad");
+          $("#signal").textContent = "● MOCKING";
+          $("#signal").style.color = "var(--amber)";
+        }
+      }, 650);
+      return;
+    }
+
+    const fakeErrors = [
+      "ACCESS DENIED: your password looked nervous.",
+      "ACCESS DENIED: insufficient confidence.",
+      "ACCESS DENIED: username passed. Password failed the vibe check.",
+      "ACCESS DENIED: system has chosen violence."
+    ];
+
+    feedback(fakeErrors[(troll.fakeChecks - 1) % fakeErrors.length], "bad");
+    dodge(id, troll.fakeChecks);
+    dodge(pass, troll.fakeChecks);
+  }
+
   function failAttempt(){
     if(state.unlocked) return;
     state.attempts++;
@@ -59,7 +178,20 @@
     feedback("direct credential path sealed. the interface is still listening.", "bad");
   }
 
-  $("#accessBtn").addEventListener("click", failAttempt);
+  $("#accessBtn").addEventListener("click", () => {
+    if(state.locked || state.unlocked) {
+      failAttempt();
+      return;
+    }
+
+    fakeValidate();
+
+    setTimeout(() => {
+      if(!state.locked && !state.unlocked && troll.fakeChecks >= 2){
+        failAttempt();
+      }
+    }, 850);
+  });
 
   $("#passcode").addEventListener("keydown", (event) => {
     if(event.key === "Enter"){
@@ -68,9 +200,64 @@
     }
   });
 
+  $("#accessId").addEventListener("focus", () => trollFieldFocus($("#accessId"), "id"));
+  $("#passcode").addEventListener("focus", () => trollFieldFocus($("#passcode"), "pass"));
+
+  $("#accessId").addEventListener("pointerenter", () => {
+    if(!state.locked && !state.unlocked && troll.idDodges < 9) trollFieldFocus($("#accessId"), "id");
+  });
+
+  $("#passcode").addEventListener("pointerenter", () => {
+    if(!state.locked && !state.unlocked && troll.passDodges < 7) trollFieldFocus($("#passcode"), "pass");
+  });
+
+  $("#accessBtn").addEventListener("pointerenter", () => {
+    if(state.locked || state.unlocked) return;
+    troll.buttonDodges++;
+    if(troll.buttonDodges <= 4){
+      dodge($("#accessBtn"), troll.buttonDodges);
+      $("#accessBtn").classList.add("troll-hover");
+      setTimeout(() => $("#accessBtn").classList.remove("troll-hover"), 240);
+      feedback(
+        troll.buttonDodges === 1
+          ? "The button moved. You are being tested."
+          : troll.buttonDodges === 2
+            ? "You almost clicked it. The button disagreed."
+            : troll.buttonDodges === 3
+              ? "This is getting embarrassing for both of us."
+              : "Fine. Click the button before it develops legs.",
+        "bad"
+      );
+    }
+  });
+
   $("#accessId").addEventListener("input", () => {
     if(state.locked && !state.unlocked){
       feedback("interesting. you are still typing into a locked terminal.", "");
+      return;
+    }
+
+    if($("#accessId").value.length === 4){
+      feedback("ACCESS ID accepted. Absolutely do not celebrate yet.", "ok");
+    }
+
+    if($("#accessId").value.length === 6){
+      $("#accessId").value = $("#accessId").value.slice(0, 5);
+      feedback("One character was returned to the void.", "bad");
+    }
+  });
+
+  $("#passcode").addEventListener("input", () => {
+    if(state.locked || state.unlocked) return;
+
+    if($("#passcode").value.length === 4){
+      feedback("PASSCODE received. The machine is pretending to care.", "ok");
+    }
+
+    if($("#passcode").value.length === 7){
+      const v=$("#passcode").value;
+      $("#passcode").value=v.slice(0,3)+v.slice(4);
+      feedback("A password character has mysteriously vanished.", "bad");
     }
   });
 

@@ -9,12 +9,29 @@
     armed: false,
     keyIndex: 0,
     unlocked: false,
-    timer: null
+    chaos: 0,
+    patience: 100,
+    lastEvade: 0,
+    velocity: { x: 0, y: 0 },
+    mouse: { x: 0, y: 0 }
   };
 
   // Puzzle-only creator route. This is not real authentication.
   // Secret path: logo x3 -> Shift + status dot -> PARADOX.
   const creatorKey = atob("UEFSQURPWA==");
+
+  const messages = [
+    "The interface noticed your cursor.",
+    "That was close. The system disagrees.",
+    "Please remain calm. The interface will not.",
+    "Excellent technique. Wrong target.",
+    "The box has learned your movement.",
+    "You are approaching the wrong thing very confidently.",
+    "System note: user frustration detected.",
+    "This terminal has chosen self-preservation.",
+    "Your persistence is statistically impressive.",
+    "The interface would like some personal space."
+  ];
 
   function show(id){
     screens.forEach(name => document.getElementById(name).classList.toggle("active", name === id));
@@ -22,6 +39,7 @@
 
   function feedback(message, type = ""){
     const el = $("#console");
+    if(!el) return;
     el.textContent = "> " + message;
     el.className = "console" + (type ? " " + type : "");
   }
@@ -31,329 +49,298 @@
     $("#lockState").textContent = state.locked ? "LOCK: SEALED" : "LOCK: OPEN";
   }
 
-  // =========================
-  // PARADOX EVADE ENGINE
-  // Fast, smooth and intentionally difficult — but always recoverable.
-  // =========================
-  const troll = {
-    idDodges: 0,
-    passDodges: 0,
-    buttonDodges: 0,
-    fakeChecks: 0,
-    lastMove: 0
-  };
+  function updatePatience(cost = 0){
+    state.chaos += cost;
+    state.patience = Math.max(0, 100 - state.chaos);
+    $("#patienceText").textContent = state.patience + "%";
+    $("#patienceBar").style.width = state.patience + "%";
 
-  const trollMessages = [
-    "The interface noticed your cursor.",
-    "Too slow. The box moved first.",
-    "You were close. The system disagrees.",
-    "The control terminal has developed survival instincts.",
-    "Please remain calm. The interface will not.",
-    "Excellent approach. Terrible timing."
-  ];
-
-  function trollMessage(index = Math.floor(Math.random() * trollMessages.length), type = ""){
-    feedback(trollMessages[index % trollMessages.length], type);
-  }
-
-  function clamp(value, min, max){
-    return Math.min(Math.max(value, min), max);
-  }
-
-  function evade(el, intensity = 1){
-    if(state.locked || state.unlocked) return;
-
-    const body = document.querySelector(".terminal-body");
-    if(!body || !el) return;
-
-    const bodyRect = body.getBoundingClientRect();
-    const elRect = el.getBoundingClientRect();
-    const now = performance.now();
-
-    if(now - troll.lastMove < 70) return;
-    troll.lastMove = now;
-
-    const padding = 12;
-    const maxX = Math.max(0, bodyRect.width - elRect.width - padding * 2);
-    const maxY = Math.max(0, bodyRect.height - elRect.height - padding * 2);
-
-    // Choose a distant point rather than a random tiny nudge.
-    const currentX = elRect.left - bodyRect.left - el.offsetLeft;
-    const currentY = elRect.top - bodyRect.top - el.offsetTop;
-
-    let x = Math.random() * maxX;
-    let y = Math.random() * maxY;
-
-    for(let i = 0; i < 8; i++){
-      const dx = x - currentX;
-      const dy = y - currentY;
-      if(Math.hypot(dx, dy) > 110 + intensity * 24) break;
-      x = Math.random() * maxX;
-      y = Math.random() * maxY;
+    if(state.patience < 70){
+      $("#patienceBar").style.background = "linear-gradient(90deg,var(--amber),var(--red))";
+      $("#patienceText").style.color = "var(--amber)";
     }
+    if(state.patience < 35){
+      $("#patienceBar").style.background = "var(--red)";
+      $("#patienceText").style.color = "var(--red)";
+      $("#intruderLine").textContent = "INTRUDERS: YOU ARE GETTING ANNOYING";
+    }
+    if(state.patience <= 0 && !state.locked){
+      sealTerminal("system patience exhausted. congratulations.");
+    }
+  }
+
+  function shakeTerminal(){
+    const terminal = document.querySelector(".terminal");
+    terminal.classList.remove("paradox-chaos");
+    void terminal.offsetWidth;
+    terminal.classList.add("paradox-chaos");
+    setTimeout(() => terminal.classList.remove("paradox-chaos"), 420);
+  }
+
+  function boundsFor(el){
+    const body = document.querySelector(".terminal-body");
+    const bodyRect = body.getBoundingClientRect();
+    const rect = el.getBoundingClientRect();
+    return {
+      body,
+      bodyRect,
+      rect,
+      minX: 0,
+      minY: 0,
+      maxX: Math.max(0, bodyRect.width - rect.width),
+      maxY: Math.max(0, bodyRect.height - rect.height)
+    };
+  }
+
+  function flee(el, power = 1){
+    if(state.locked || state.unlocked || !el) return;
+
+    const now = performance.now();
+    if(now - state.lastEvade < 42) return;
+    state.lastEvade = now;
+
+    const b = boundsFor(el);
+
+    const dx = (eventSafeMouseX() - (b.rect.left + b.rect.width / 2));
+    const dy = (eventSafeMouseY() - (b.rect.top + b.rect.height / 2));
+    const dist = Math.max(1, Math.hypot(dx,dy));
+    const awayX = -dx / dist;
+    const awayY = -dy / dist;
+
+    const jump = 130 + power * 48;
+    let tx = awayX * jump + (Math.random() - .5) * 80;
+    let ty = awayY * jump + (Math.random() - .5) * 55;
+
+    tx = Math.max(-260, Math.min(260, tx));
+    ty = Math.max(-140, Math.min(140, ty));
 
     el.style.position = "relative";
-    el.style.transition = "transform 90ms cubic-bezier(.1,.9,.15,1)";
-    el.style.transform = `translate(${x - currentX}px,${y - currentY}px)`;
-    el.classList.add("troll-dodge");
+    el.style.zIndex = "8";
+    el.style.transition = "transform 70ms cubic-bezier(.02,.96,.1,1)";
+    el.style.transform = `translate3d(${tx}px,${ty}px,0)`;
 
+    updatePatience(2 + Math.min(7, power));
+    document.documentElement.style.setProperty("--cx", (state.mouse.x / innerWidth * 100) + "%");
+    document.documentElement.style.setProperty("--cy", (state.mouse.y / innerHeight * 100) + "%");
+    $("#intruderLine").style.color = "var(--red)";
     setTimeout(() => {
       if(!state.locked && !state.unlocked){
-        el.style.transition = "transform 220ms cubic-bezier(.2,.8,.15,1)";
+        $("#intruderLine").style.color = "";
       }
-    }, 95);
+    }, 180);
   }
 
-  function trollFieldFocus(el, kind){
-    if(state.locked || state.unlocked) return;
-
-    if(kind === "id"){
-      troll.idDodges++;
-      if(troll.idDodges <= 10){
-        evade(el, Math.min(5, troll.idDodges));
-        const messages = [
-          "ACCESS ID detected. Evasive maneuver initiated.",
-          "You found the username field. It found somewhere else.",
-          "ACCESS ID is refusing to be perceived.",
-          "Cursor proximity: unacceptable.",
-          "The box has learned your movement."
-        ];
-        feedback(messages[(troll.idDodges - 1) % messages.length], "bad");
+  function resetTarget(el, delay = 900){
+    setTimeout(() => {
+      if(!state.locked && !state.unlocked && el){
+        el.style.transition = "transform 260ms cubic-bezier(.2,.8,.2,1)";
+        el.style.transform = "translate3d(0,0,0)";
+        el.style.zIndex = "";
       }
-    } else {
-      troll.passDodges++;
-      if(troll.passDodges <= 8){
-        evade(el, Math.min(5, troll.passDodges));
-        const messages = [
-          "PASSCODE target acquired. Target relocating.",
-          "Password box has entered evasive mode.",
-          "Correct field. Wrong moment.",
-          "Authentication control moving beyond your reach."
-        ];
-        feedback(messages[(troll.passDodges - 1) % messages.length], "bad");
-      }
-    }
+    }, delay);
   }
 
-  function fakeValidate(){
+  function eventSafeMouseX(){ return state.mouse.x; }
+  function eventSafeMouseY(){ return state.mouse.y; }
+
+  function maybeSeal(){
     if(state.locked || state.unlocked) return;
-
-    const id = $("#accessId");
-    const pass = $("#passcode");
-    const idValue = id.value.trim();
-    const passValue = pass.value.trim();
-
-    if(!idValue && !passValue){
-      feedback("You entered absolutely nothing. Bold strategy.");
-      evade(id, 3);
-      return;
+    if(state.chaos >= 100){
+      sealTerminal("system patience exhausted. you win by being unbearable.");
     }
-
-    troll.fakeChecks++;
-    const terminal = document.querySelector(".terminal");
-    terminal.classList.add("troll-glitch");
-    setTimeout(() => terminal.classList.remove("troll-glitch"), 220);
-
-    if(idValue.length >= 3 && passValue.length >= 3){
-      feedback("credentials accepted... validating confidence...", "ok");
-      setTimeout(() => {
-        if(!state.locked && !state.unlocked){
-          feedback("Confidence rejected. Credentials remain suspicious.", "bad");
-          $("#signal").textContent = "● MOCKING";
-          $("#signal").style.color = "var(--amber)";
-          evade(id, 4);
-          evade(pass, 4);
-        }
-      }, 520);
-      return;
-    }
-
-    const fakeErrors = [
-      "ACCESS DENIED: your password looked nervous.",
-      "ACCESS DENIED: insufficient confidence.",
-      "ACCESS DENIED: username passed. Password failed the vibe check.",
-      "ACCESS DENIED: system has chosen violence."
-    ];
-
-    feedback(fakeErrors[(troll.fakeChecks - 1) % fakeErrors.length], "bad");
-    evade(id, troll.fakeChecks);
-    evade(pass, troll.fakeChecks);
   }
 
-  function fakeValidate(){
+  function sealTerminal(reason = "direct credential path sealed."){
     if(state.locked || state.unlocked) return;
-
-    const id = $("#accessId");
-    const pass = $("#passcode");
-    const idValue = id.value.trim();
-    const passValue = pass.value.trim();
-
-    if(!idValue && !passValue){
-      feedback("You entered absolutely nothing. Bold strategy.");
-      dodge(id, 2);
-      return;
-    }
-
-    troll.fakeChecks++;
-    const terminal = document.querySelector(".terminal");
-    terminal.classList.add("troll-glitch");
-
-    if(idValue.length >= 3 && passValue.length >= 3){
-      feedback("credentials accepted... wait...", "ok");
-      setTimeout(() => {
-        if(!state.locked && !state.unlocked){
-          feedback("Nope. The system changed its mind.", "bad");
-          $("#signal").textContent = "● MOCKING";
-          $("#signal").style.color = "var(--amber)";
-        }
-      }, 650);
-      return;
-    }
-
-    const fakeErrors = [
-      "ACCESS DENIED: your password looked nervous.",
-      "ACCESS DENIED: insufficient confidence.",
-      "ACCESS DENIED: username passed. Password failed the vibe check.",
-      "ACCESS DENIED: system has chosen violence."
-    ];
-
-    feedback(fakeErrors[(troll.fakeChecks - 1) % fakeErrors.length], "bad");
-    dodge(id, troll.fakeChecks);
-    dodge(pass, troll.fakeChecks);
-  }
-
-  function failAttempt(){
-    if(state.unlocked) return;
-    state.attempts++;
+    state.locked = true;
     setAttempts();
 
     const terminal = document.querySelector(".terminal");
-    terminal.classList.remove("shake");
-    void terminal.offsetWidth;
-    terminal.classList.add("shake");
-
-    if(state.attempts < 3){
-      feedback(
-        state.attempts === 1
-          ? "credential rejected. that was almost impressively normal."
-          : "credential rejected. stop treating this like a normal login.",
-        "bad"
-      );
-      return;
-    }
-
-    state.locked = true;
     terminal.classList.add("locked");
     $("#accessBtn").disabled = true;
     $("#status").textContent = "SEALED";
     $("#signal").textContent = "● HOSTILE";
-    feedback("direct credential path sealed. the interface is still listening.", "bad");
+    $("#signal").style.color = "var(--red)";
+    feedback(reason, "bad");
+    shakeTerminal();
   }
 
-  $("#accessBtn").addEventListener("click", () => {
-    if(state.locked || state.unlocked) {
-      failAttempt();
+  function failAttempt(){
+    if(state.unlocked || state.locked) return;
+
+    state.attempts++;
+    setAttempts();
+    updatePatience(8);
+    shakeTerminal();
+
+    const lines = [
+      "credential rejected. that was almost impressively normal.",
+      "credential rejected. stop treating this like a normal login.",
+      "three guesses later and the machine has opinions."
+    ];
+
+    feedback(lines[Math.min(state.attempts - 1, lines.length - 1)], "bad");
+
+    if(state.attempts >= 3) sealTerminal("direct credential path sealed. the interface is still listening.");
+  }
+
+  function fakeValidate(){
+    if(state.locked || state.unlocked) return;
+
+    const id = $("#accessId");
+    const pass = $("#passcode");
+    const hasId = id.value.trim().length >= 2;
+    const hasPass = pass.value.trim().length >= 2;
+
+    if(!hasId && !hasPass){
+      feedback("You entered absolutely nothing. Bold strategy.");
+      flee(id, 5);
+      updatePatience(5);
       return;
     }
 
-    fakeValidate();
+    shakeTerminal();
+    updatePatience(5);
 
-    setTimeout(() => {
-      if(!state.locked && !state.unlocked && troll.fakeChecks >= 2){
-        failAttempt();
-      }
-    }, 850);
-  });
+    if(hasId && hasPass){
+      feedback("credentials accepted... calculating regret...", "ok");
+      setTimeout(() => {
+        if(state.locked || state.unlocked) return;
+        feedback("Nope. The system changed its mind.", "bad");
+        $("#signal").textContent = "● MOCKING";
+        $("#signal").style.color = "var(--amber)";
+        flee(id, 6);
+        flee(pass, 6);
+        updatePatience(7);
+      }, 480);
+      return;
+    }
+
+    const errors = [
+      "ACCESS DENIED: incomplete effort.",
+      "ACCESS DENIED: your password looked nervous.",
+      "ACCESS DENIED: username passed. password failed the vibe check.",
+      "ACCESS DENIED: system has chosen violence."
+    ];
+
+    feedback(errors[Math.min(state.attempts, errors.length - 1)], "bad");
+    flee(id, 4);
+    flee(pass, 4);
+    state.attempts++;
+    setAttempts();
+    if(state.attempts >= 3) sealTerminal("direct path rejected. you were never supposed to use it.");
+  }
+
+  $("#accessBtn").addEventListener("click", fakeValidate);
 
   $("#passcode").addEventListener("keydown", (event) => {
     if(event.key === "Enter"){
       event.preventDefault();
-      $("#accessBtn").click();
+      fakeValidate();
     }
   });
 
-  $("#accessId").addEventListener("focus", () => trollFieldFocus($("#accessId"), "id"));
-  $("#passcode").addEventListener("focus", () => trollFieldFocus($("#passcode"), "pass"));
+  $("#accessId").addEventListener("focus", () => {
+    if(state.locked || state.unlocked) return;
+    feedback("ACCESS ID detected. Evasive behavior enabled.", "bad");
+    flee($("#accessId"), 4);
+  });
+
+  $("#passcode").addEventListener("focus", () => {
+    if(state.locked || state.unlocked) return;
+    feedback("PASSCODE target acquired. Target relocating.", "bad");
+    flee($("#passcode"), 5);
+  });
 
   document.addEventListener("pointermove", (event) => {
+    state.velocity.x = event.clientX - state.mouse.x;
+    state.velocity.y = event.clientY - state.mouse.y;
+    state.mouse.x = event.clientX;
+    state.mouse.y = event.clientY;
+
     if(state.locked || state.unlocked) return;
 
     const targets = [
-      { el: $("#accessId"), kind: "id", radius: 95 },
-      { el: $("#passcode"), kind: "pass", radius: 105 },
-      { el: $("#accessBtn"), kind: "button", radius: 115 }
+      {el:$("#accessId"), radius:125, power:4},
+      {el:$("#passcode"), radius:135, power:5},
+      {el:$("#accessBtn"), radius:150, power:6}
     ];
 
     for(const target of targets){
-      const el = target.el;
-      if(!el) continue;
+      if(!target.el) continue;
+      const r = target.el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dist = Math.hypot(event.clientX - cx, event.clientY - cy);
 
-      const rect = el.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const distance = Math.hypot(event.clientX - cx, event.clientY - cy);
+      if(dist < target.radius){
+        flee(target.el, target.power);
 
-      if(distance < target.radius){
-        if(target.kind === "id" && troll.idDodges < 12){
-          troll.idDodges++;
-          evade(el, Math.min(7, troll.idDodges));
-          trollMessage(troll.idDodges + 1, "bad");
-        } else if(target.kind === "pass" && troll.passDodges < 10){
-          troll.passDodges++;
-          evade(el, Math.min(7, troll.passDodges));
-          trollMessage(troll.passDodges + 2, "bad");
-        } else if(target.kind === "button" && troll.buttonDodges < 9){
-          troll.buttonDodges++;
-          evade(el, Math.min(7, troll.buttonDodges));
+        if(target.el === $("#accessBtn")){
+          $("#accessBtn").classList.add("button-hunted");
           feedback(
-            troll.buttonDodges < 4
-              ? "The button detected your cursor."
-              : troll.buttonDodges < 7
-                ? "You are getting warmer. The button is not."
-                : "At this point, the button is just bullying you.",
+            state.chaos < 35 ? "The button detected your cursor." :
+            state.chaos < 65 ? "You are getting warmer. The button is not." :
+            "At this point, the button is just bullying you.",
             "bad"
           );
+        } else {
+          target.el.classList.add("field-hunted");
+          feedback(messages[Math.floor(state.chaos / 10) % messages.length], "bad");
         }
+        resetTarget(target.el, 1150);
         break;
       }
     }
+
+    if(state.chaos > 45){
+      document.body.classList.add("paradox-chaos");
+      setTimeout(() => document.body.classList.remove("paradox-chaos"), 180);
+    }
+
+    maybeSeal();
   });
 
   $("#accessId").addEventListener("input", () => {
-    if(state.locked && !state.unlocked){
-      feedback("interesting. you are still typing into a locked terminal.", "");
+    if(state.locked){
+      feedback("interesting. you are still typing into a sealed terminal.", "");
       return;
     }
 
-    if($("#accessId").value.length === 4){
-      feedback("ACCESS ID accepted. Absolutely do not celebrate yet.", "ok");
+    const value = $("#accessId").value;
+
+    if(value.length === 3){
+      feedback("ACCESS ID accepted. Don't celebrate.", "ok");
     }
 
-    if($("#accessId").value.length === 6){
-      $("#accessId").value = $("#accessId").value.slice(0, 5);
+    if(value.length === 6){
+      $("#accessId").value = value.slice(0,5);
       feedback("One character was returned to the void.", "bad");
+      updatePatience(5);
     }
   });
 
   $("#passcode").addEventListener("input", () => {
     if(state.locked || state.unlocked) return;
 
-    if($("#passcode").value.length === 4){
+    const value = $("#passcode").value;
+
+    if(value.length === 4){
       feedback("PASSCODE received. The machine is pretending to care.", "ok");
     }
 
-    if($("#passcode").value.length === 7){
-      const v=$("#passcode").value;
-      $("#passcode").value=v.slice(0,3)+v.slice(4);
+    if(value.length === 7){
+      $("#passcode").value = value.slice(0,3) + value.slice(4);
       feedback("A password character has mysteriously vanished.", "bad");
+      updatePatience(6);
     }
   });
 
-  $("#authBrand"); // deliberate no-op keeps the interface structure obvious.
-
   document.querySelector(".brand").addEventListener("click", () => {
     if(!state.locked || state.unlocked) return;
+
     state.logoClicks++;
+
     if(state.logoClicks === 1) feedback("auxiliary channel listening...", "");
     else if(state.logoClicks === 2) feedback("signal repeated. one more.", "");
     else if(state.logoClicks === 3) feedback("channel primed. now stop clicking things.", "");
@@ -365,12 +352,14 @@
 
   $("#statusDot").addEventListener("click", (event) => {
     if(!state.locked || state.unlocked) return;
+
     if(event.shiftKey && state.logoClicks === 3){
       state.armed = true;
       state.keyIndex = 0;
       feedback("modified signal accepted. creator channel armed.", "");
       return;
     }
+
     if(state.logoClicks === 3){
       feedback("wrong signal modifier. the system expected a different input.", "bad");
     }
@@ -384,7 +373,10 @@
     if(key === creatorKey[state.keyIndex]){
       state.keyIndex++;
       feedback("creator channel: " + state.keyIndex + "/" + creatorKey.length, "");
-      if(state.keyIndex === creatorKey.length) unlock();
+
+      if(state.keyIndex === creatorKey.length){
+        unlock();
+      }
       return;
     }
 
@@ -399,14 +391,23 @@
     state.unlocked = true;
     state.locked = false;
     state.armed = false;
+
     $("#status").textContent = "ONLINE";
     $("#signal").textContent = "● ONLINE";
     $("#signal").style.color = "var(--green)";
     $("#lockState").textContent = "LOCK: OVERRIDE";
     $("#accessBtn").textContent = "ACCESS GRANTED";
     $("#console").className = "console ok";
-    feedback("creator override accepted. welcome, architect.");
-    $("#welcomeText").textContent = "You did not defeat the password. You noticed the system.";
+    $("#patienceText").textContent = "OVERRIDE";
+    $("#patienceBar").style.width = "100%";
+    $("#patienceBar").style.background = "var(--green)";
+    $("#intruderLine").textContent = "INTRUDERS: ARCHITECT IDENTIFIED";
+
+    feedback("creator override accepted. welcome, architect.", "ok");
+
+    $("#welcomeText").textContent =
+      "You did not defeat the password. You survived the interface.";
+
     setTimeout(() => show("welcome"), 900);
   }
 
@@ -414,4 +415,14 @@
     show("experience");
     $("#status").textContent = "ACTIVE";
   });
+
+  // Keep focus behavior intentional while preventing browser-level surprises.
+  window.addEventListener("blur", () => {
+    if(!state.locked && !state.unlocked){
+      feedback("Focus lost. The machine has filed that under suspicious behavior.", "");
+    }
+  });
+
+  $("#patienceBar").style.width = "100%";
+  $("#patienceText").textContent = "100%";
 })();

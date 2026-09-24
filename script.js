@@ -124,9 +124,24 @@
 
   function startGame(){
     state.lives=3;state.loginAttempts=0;updateHud();unlockCards();showScreen('lobbyScreen');audio.beep(580,.08);
+    setTimeout(randomIdleJoke,450);
   }
 
   function showHow(){showScreen('howScreen')}
+
+  const idleJokes=[
+    'system mood: pretending to be professional',
+    'security status: emotionally unavailable',
+    'dog status: still judging',
+    'cat status: read your request, ignored it',
+    'server status: somehow doing fine',
+    'developer status: please do not inspect that button'
+  ];
+
+  function randomIdleJoke(){
+    const joke=idleJokes[Math.floor(Math.random()*idleJokes.length)];
+    toast(joke);
+  }
 
   function startLevel1(){
     state.loginAttempts=0;state.levelTime=60;updateLoginUi();clearInterval(state.levelTimer);
@@ -168,11 +183,13 @@
     loseLife();
     updateLoginUi();
     const reactions=[
-      ['assets/dog-reaction.svg','dog says: bro...'],
-      ['assets/cat-reaction.svg','cat says: absolutely not.'],
-      ['assets/dog-reaction.svg','system says: please stop guessing.']
+      ['assets/dog-reaction.svg','dog says: bro... that was not the password.'],
+      ['assets/cat-reaction.svg','cat says: I have seen better guesses from autocorrect.'],
+      ['assets/dog-reaction.svg','system says: please stop speedrunning failure.'],
+      ['assets/cat-reaction.svg','cat has officially lost trust in your keyboard.'],
+      ['assets/dog-reaction.svg','dog would like to know why you typed that.']
     ];
-    const r=reactions[Math.min(state.loginAttempts-1,2)];
+    const r=reactions[Math.min(state.loginAttempts-1,reactions.length-1)];
     $('#reactionImg').src=r[0];$('#reactionText').textContent=r[1];
     $('#loginOutput').className='terminal-output bad';
     $('#loginOutput').textContent='> ACCESS DENIED — '+r[1];
@@ -180,8 +197,9 @@
     audio.beep(210,.1,'square');
 
     if(state.loginAttempts>=3){
-      $('#loginOutput').textContent='> DIRECT ACCESS SEALED. THE INTERFACE IS LISTENING.';
-      toast('Password route sealed. Maybe click around.');
+      $('#loginOutput').textContent='> DIRECT ACCESS SEALED. YOU HAVE USED ALL THREE OF YOUR GOOD IDEAS.';
+      $('#reactionText').textContent='The system has stopped accepting passwords and started accepting clues.';
+      toast('Password route sealed. The website wants you to think.');
     }
   }
 
@@ -214,10 +232,12 @@
     state.buttonScore+=25;$('#buttonScore').textContent=String(state.buttonScore).padStart(3,'0');
     const lines=[
       'system: why did you do that?',
-      'system: it literally said do not press.',
+      'system: it literally said DO NOT PRESS.',
       'dog: i knew this would happen.',
-      'cat: embarrassing.',
-      'system: button pressed. civilization continues.'
+      'cat: embarrassing. but expected.',
+      'system: button pressed. humanity survives another day.',
+      'system: you have now pressed it five times. this is a lifestyle choice.',
+      'system: please stop. the button has learned your weakness.'
     ];
     const line=lines[Math.min(Math.floor(state.buttonScore/25)-1,lines.length-1)];
     $('#buttonLog').textContent='> '+line;
@@ -259,7 +279,7 @@
     if(idx!==state.memorySequence[position]){
       event.currentTarget.classList.add('fail');setTimeout(()=>event.currentTarget.classList.remove('fail'),350);
       loseLife();state.memoryRound=1;$('#memoryRound').textContent='01';
-      $('#memoryStatus').textContent='wrong. the cat has forgotten you.';
+      $('#memoryStatus').textContent='wrong. the cat remembers everything except helping you.';
       meme('assets/cat-reaction.svg','cat memory: rejected.');
       state.memorySequence=[];return;
     }

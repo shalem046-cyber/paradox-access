@@ -1,287 +1,121 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#080811">
-  <meta name="description" content="PARADOX//ACCESS — a funny interactive browser game where the login is level one.">
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <title>PARADOX//ACCESS — THE GAME</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090811">
+<title>PARADOX//ACCESS — GAME</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="crt" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
+<div class="bg-grid"></div>
+<div class="fx fx-a"></div><div class="fx fx-b"></div>
 
-  <main class="game-shell">
-    <div class="top-hud">
-      <div class="brand-chip"><span class="brand-p">P</span><span>PARADOX//ACCESS</span></div>
-      <div class="hud-stats">
-        <div><small>LEVEL</small><strong id="hudLevel">01</strong></div>
-        <div><small>SCORE</small><strong id="hudScore">0000</strong></div>
-        <div><small>LIVES</small><strong id="hudLives">♥♥♥</strong></div>
-        <button class="icon-btn" id="soundBtn" type="button" aria-label="Toggle sound">🔊</button>
+<main id="app">
+  <header class="hud">
+    <button class="logo" id="logo" aria-label="Paradox">
+      <span class="logo-mark">P</span><span>PARADOX<span>//</span>ACCESS</span>
+    </button>
+    <div class="hud-center">
+      <div><small>LEVEL</small><b id="hudLevel">--</b></div>
+      <div><small>SCORE</small><b id="hudScore">0000</b></div>
+      <div><small>LIVES</small><b id="hudLives">♥♥♥</b></div>
+    </div>
+    <button class="sound" id="soundBtn" aria-label="Toggle sound">🔊</button>
+  </header>
+
+  <section class="screen show" id="home">
+    <div class="home-wrap">
+      <div class="home-copy">
+        <div class="eyebrow">A SMALL GAME WITH BIG TRUST ISSUES</div>
+        <h1>DON'T JUST<br><span>LOG IN.</span><br>PLAY THE LOGIN.</h1>
+        <p>Three fast challenges. Funny consequences. One very suspicious website.</p>
+        <button class="hero-btn" id="startBtn"><span>START GAME</span><b>→</b></button>
+        <button class="mini-btn" id="rulesBtn">how does this work?</button>
+      </div>
+
+      <div class="hero-machine">
+        <div class="machine-top"><span>PARADOX TERMINAL</span><i>● LIVE</i></div>
+        <div class="machine-screen">
+          <div class="scan"></div>
+          <div class="face">ಠ‿ಠ</div>
+          <div class="machine-word">READY?</div>
+          <div class="machine-note">tap the button before you regret it</div>
+        </div>
+        <div class="machine-bottom">
+          <span class="led pink"></span><span class="led lime"></span><span class="bar"></span><span class="machine-small">NO DOWNLOAD</span>
+        </div>
       </div>
     </div>
 
-    <section class="screen active" id="startScreen">
-      <div class="home-kicker">
-        <span class="pulse-dot"></span>
-        <span>PARADOX SERVER // READY</span>
-        <span class="kicker-pill">FREE TO PLAY</span>
+    <div class="home-cards">
+      <div class="home-card"><span>01</span><b>LOGIN PANIC</b><p>Build the password before the timer laughs at you.</p></div>
+      <div class="home-card pink"><span>02</span><b>RUNNING BUTTON</b><p>The button does not want to be clicked. Good luck.</p></div>
+      <div class="home-card lime"><span>03</span><b>CAT MEMORY</b><p>Watch. Remember. Tap. Don't embarrass yourself.</p></div>
+    </div>
+    <div class="home-bottom">PHONE FRIENDLY • NO ACCOUNT NEEDED • MEMES INCLUDED</div>
+  </section>
+
+  <section class="screen" id="rules">
+    <div class="modal-card">
+      <div class="eyebrow">HOW TO PLAY</div>
+      <h2>Very simple.</h2>
+      <div class="rules-grid">
+        <div><b>01</b><span>Beat each level.</span></div>
+        <div><b>02</b><span>Wrong moves cost a life.</span></div>
+        <div><b>03</b><span>Funny reactions are intentional.</span></div>
+        <div><b>04</b><span>Some things are hidden on purpose.</span></div>
       </div>
+      <button class="mini-btn filled" id="rulesBack">got it</button>
+    </div>
+  </section>
 
-      <div class="home-hero">
-        <div class="home-copy">
-          <div class="home-tag">A BROWSER GAME WITH SLIGHTLY CONCERNING JUDGEMENT</div>
-          <h1>Looks innocent.<br><em>That is the trap.</em></h1>
-          <p class="home-sub">Three tiny challenges. One login. Several bad decisions.</p>
-
-          <div class="home-actions">
-            <button class="game-btn primary hero-play" id="startBtn">
-              <span>FIND OUT WHY</span><b>→</b>
-            </button>
-            <button class="game-btn secondary hero-how" id="howBtn">
-              <span>I HAVE QUESTIONS</span><b>?</b>
-            </button>
-          </div>
-
-          <div class="home-proof">
-            <div><strong>03</strong><span>mini games</span></div>
-            <div><strong>∞</strong><span>bad decisions</span></div>
-            <div><strong>0</strong><span>downloads</span></div>
-          </div>
-        </div>
-
-        <div class="hero-cabinet">
-          <div class="cabinet-glow"></div>
-          <div class="cabinet-top">
-            <span>PARADOX//ACCESS</span>
-            <span class="cabinet-live"><i></i> LIVE</span>
-          </div>
-          <div class="cabinet-screen">
-            <div class="cabinet-badge">LEVEL 01</div>
-            <div class="cabinet-face">ಠ‿ಠ</div>
-            <div class="cabinet-title">LOGIN LOCK</div>
-            <div class="cabinet-tip">the button works. your decisions are the problem.</div>
-          </div>
-          <div class="cabinet-controls">
-            <span class="control-dot pink"></span>
-            <span class="control-dot lime"></span>
-            <div class="control-line"></div>
-            <span class="control-text">READY</span>
-          </div>
-        </div>
+  <section class="screen" id="game">
+    <div class="game-head">
+      <div>
+        <div class="eyebrow" id="levelEyebrow">LEVEL 01</div>
+        <h2 id="levelTitle">LOGIN PANIC</h2>
+        <p id="levelDesc">Build the correct code.</p>
       </div>
+      <div class="timer"><small>TIME</small><b id="timer">30</b></div>
+    </div>
 
-      <div class="home-bottom">
-        <div class="preview-card preview-main">
-          <div class="preview-label">WHAT YOU'LL PLAY</div>
-          <div class="preview-title-row"><h3>01 Login Lock</h3><span>READY</span></div>
-          <p>Get through the login. Or discover why the login keeps getting funnier.</p>
-        </div>
+    <div class="stage">
+      <div class="stage-main" id="stageMain"></div>
+      <aside class="reaction" id="reaction">
+        <img id="reactionImg" src="assets/dog-reaction.svg" alt="Funny reaction">
+        <div class="reaction-tag">SYSTEM REACTION</div>
+        <p id="reactionText">the dog is watching.</p>
+      </aside>
+    </div>
+  </section>
 
-        <div class="preview-card meme-preview">
-          <img src="assets/dog-reaction.svg" alt="Funny dog reaction">
-          <div>
-            <span class="preview-label">REACTION ENGINE</span>
-            <h3>Wrong password?</h3>
-            <p>the website has screenshots.</p>
-          </div>
-        </div>
-
-        <div class="preview-card stat-preview">
-          <span class="preview-label">SYSTEM MOOD</span>
-          <strong>SLIGHTLY CONCERNING</strong>
-          <span>but welcoming.</span>
-        </div>
+  <section class="screen" id="win">
+    <div class="win">
+      <div class="win-face">😎</div>
+      <div class="eyebrow">RUN COMPLETE</div>
+      <h2>YOU SURVIVED.</h2>
+      <p id="winText">The system has reluctantly accepted your existence.</p>
+      <div class="win-stats">
+        <div><small>SCORE</small><b id="winScore">0000</b></div>
+        <div><small>LIVES</small><b id="winLives">♥♥♥</b></div>
+        <div><small>STATUS</small><b>STILL SUSPICIOUS</b></div>
       </div>
-
-      <div class="system-thought" id="serverThought">SYSTEM THOUGHT: the dog has seen your password.</div>
-      <div class="home-foot">NO ACCOUNT REQUIRED • PHONE FRIENDLY • PLAY IN YOUR BROWSER • PLEASE DO NOT BLAME THE DOG</div>
-    </section>
-
-    <section class="screen" id="lobbyScreen">
-      <div class="screen-head">
-        <div>
-          <div class="pixel-label">MISSION SELECT</div>
-          <h2>CHOOSE YOUR TROUBLE.</h2>
-          <p>Every level is tiny. The consequences are unnecessarily dramatic.</p>
-        </div>
-        <button class="game-btn secondary small" id="resetBtn">RESET RUN</button>
+      <div class="win-actions">
+        <button class="hero-btn" id="againBtn">PLAY AGAIN →</button>
+        <button class="mini-btn" id="copyBtn">copy result</button>
       </div>
+    </div>
+  </section>
+</main>
 
-      <div class="profile-bar">
-        <div><small>PLAYER</small><strong id="playerName">GUEST</strong></div>
-        <div><small>XP</small><strong id="hudXp">0</strong></div>
-        <div><small>BEST</small><strong id="hudBest">0000</strong></div>
-        <div><small>STATUS</small><strong class="lime">SLIGHTLY CONCERNING</strong></div>
-      </div>
+<div class="meme-popup" id="memePopup">
+  <img id="popupImg" src="assets/dog-reaction.svg" alt="">
+  <div><span id="popupTag">BRO...</span><b id="popupText">you really clicked that.</b></div>
+</div>
 
-      <div class="level-grid">
-        <button class="level-card unlocked" data-level="1">
-          <div class="level-no">01</div>
-          <div class="level-icon">🔐</div>
-          <div class="level-title">LOGIN LOCK</div>
-          <p>Looks normal. Is not.</p>
-          <span class="level-tag">READY</span>
-        </button>
-
-        <button class="level-card locked" data-level="2">
-          <div class="level-no">02</div>
-          <div class="level-icon">🚨</div>
-          <div class="level-title">DON'T PRESS</div>
-          <p>There is a button. You know what to do.</p>
-          <span class="level-tag">LOCKED</span>
-        </button>
-
-        <button class="level-card locked" data-level="3">
-          <div class="level-no">03</div>
-          <div class="level-icon">🐱</div>
-          <div class="level-title">CAT MEMORY</div>
-          <p>Remember the sequence. The cat will not.</p>
-          <span class="level-tag">LOCKED</span>
-        </button>
-      </div>
-
-      <div class="lobby-footer">TIP: Wrong answers are not failures. They are free entertainment for everyone except you.</div>
-    </section>
-
-    <section class="screen game-screen" id="loginLevel">
-      <div class="level-header">
-        <button class="icon-btn back-btn" data-back>←</button>
-        <div><div class="pixel-label">LEVEL 01</div><h2>LOGIN LOCK</h2></div>
-        <div class="timer-box"><small>TIME</small><strong id="levelTimer">60</strong></div>
-      </div>
-
-      <div class="login-stage">
-        <div class="login-side">
-          <div class="quest-card">
-            <span class="quest-label">MISSION</span>
-            <h3>Get inside.</h3>
-            <p>The normal route exists. The weird route exists too. You probably will not find the second one on purpose.</p>
-            <div class="quest-row"><span>REWARD</span><b>+250 XP</b></div>
-            <div class="quest-row"><span>PENALTY</span><b>-1 LIFE</b></div>
-          </div>
-
-          <div class="reaction-card" id="reactionCard">
-            <img id="reactionImg" src="assets/dog-reaction.svg" alt="Funny reaction">
-            <div class="reaction-copy">
-              <span>SECURITY COMMENT</span>
-              <p id="reactionText">Please enter something less suspicious.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="login-terminal">
-          <div class="terminal-head"><span>ACCESS TERMINAL</span><span id="loginStatus" class="lime">WAITING</span></div>
-          <form id="gameLoginForm">
-            <label for="gameUser">ACCESS ID</label>
-            <input id="gameUser" autocomplete="off" placeholder="try: guest">
-
-            <label for="gamePass">PASSCODE</label>
-            <div class="input-wrap">
-              <input id="gamePass" type="password" autocomplete="off" placeholder="try: paradox">
-              <button type="button" id="togglePass">show</button>
-            </div>
-
-            <button class="game-btn primary full" type="submit">ATTEMPT LOGIN →</button>
-            <button class="game-btn secondary full" type="button" id="guestLogin">I'M IN A HURRY</button>
-          </form>
-
-          <div class="terminal-output" id="loginOutput">> terminal ready...</div>
-          <div class="attempts" id="attemptsText">ATTEMPTS 0 / 3</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="screen game-screen" id="buttonLevel">
-      <div class="level-header">
-        <button class="icon-btn back-btn" data-back>←</button>
-        <div><div class="pixel-label">LEVEL 02</div><h2>DON'T PRESS</h2></div>
-        <div class="timer-box"><small>SCORE</small><strong id="buttonScore">000</strong></div>
-      </div>
-
-      <div class="button-game">
-        <div class="warning-board">
-          <div class="warning-top">!!! OFFICIAL WARNING !!!</div>
-          <h3>DO NOT PRESS<br>THE BUTTON.</h3>
-          <p>Seriously. This is the entire level.</p>
-          <div class="warning-small">Pressing it may cause absolutely nothing.</div>
-          <button class="big-danger" id="dontPress">DO NOT PRESS</button>
-          <div class="warning-log" id="buttonLog">system: patience test started.</div>
-        </div>
-        <div class="side-meme">
-          <img id="buttonMemeImg" src="assets/cat-reaction.svg" alt="">
-          <strong id="buttonMemeText">the cat thinks you will press it.</strong>
-        </div>
-      </div>
-    </section>
-
-    <section class="screen game-screen" id="memoryLevel">
-      <div class="level-header">
-        <button class="icon-btn back-btn" data-back>←</button>
-        <div><div class="pixel-label">LEVEL 03</div><h2>CAT MEMORY</h2></div>
-        <div class="timer-box"><small>ROUND</small><strong id="memoryRound">01</strong></div>
-      </div>
-
-      <div class="memory-game">
-        <div class="memory-intro">
-          <div class="cat-face">=^.^=</div>
-          <h3>Copy the sequence.</h3>
-          <p>The cat will blink four tiles. Then it will pretend it never did.</p>
-          <button class="game-btn primary" id="memoryStart">START SEQUENCE</button>
-          <div id="memoryStatus" class="memory-status">waiting for player...</div>
-        </div>
-        <div class="memory-grid" id="memoryGrid">
-          <button data-tile="0"></button><button data-tile="1"></button>
-          <button data-tile="2"></button><button data-tile="3"></button>
-          <button data-tile="4"></button><button data-tile="5"></button>
-          <button data-tile="6"></button><button data-tile="7"></button>
-          <button data-tile="8"></button>
-        </div>
-      </div>
-    </section>
-
-    <section class="screen" id="winScreen">
-      <div class="win-card">
-        <div class="win-eyebrow">MISSION COMPLETE</div>
-        <div class="win-face">😎</div>
-        <h2>YOU ACTUALLY DID IT.</h2>
-        <p id="winMessage">The system has reluctantly accepted your existence.</p>
-        <div class="win-stats">
-          <div><small>SCORE</small><strong id="winScore">0000</strong></div>
-          <div><small>XP</small><strong id="winXp">000</strong></div>
-          <div><small>LIVES</small><strong id="winLives">♥♥♥</strong></div>
-        </div>
-        <div class="button-row center">
-          <button class="game-btn primary" id="playAgain">BACK TO LOBBY</button>
-          <button class="game-btn secondary" id="shareBtn">COPY RESULT</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="screen" id="howScreen">
-      <div class="how-card">
-        <div class="pixel-label">HOW TO PLAY</div>
-        <h2>IT'S NOT THAT SERIOUS.</h2>
-        <div class="how-grid">
-          <div><b>01</b><p>Start the game and choose a level.</p></div>
-          <div><b>02</b><p>Wrong attempts trigger the site's meme reactions.</p></div>
-          <div><b>03</b><p>Finish levels to unlock the next one.</p></div>
-          <div><b>04</b><p>There are hidden interactions. Curiosity is a mechanic.</p></div>
-        </div>
-        <button class="game-btn primary" id="howBack">GOT IT</button>
-      </div>
-    </section>
-  </main>
-
-  <div class="floating-meme" id="floatingMeme" aria-hidden="true">
-    <img src="assets/dog-reaction.svg" alt="">
-    <span id="floatingMemeText">bro...</span>
-  </div>
-  <div class="toast" id="toast"></div>
-
-  <script src="script.js"></script>
+<div class="toast" id="toast"></div>
+<script src="script.js"></script>
 </body>
 </html>

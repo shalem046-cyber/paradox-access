@@ -12,25 +12,35 @@
   let checkpointIndex=0;
 
   const platforms=[
-    {x:0,y:735,w:700,h:50},{x:820,y:680,w:320,h:40},{x:1210,y:610,w:250,h:35},
-    {x:1510,y:690,w:230,h:40},{x:1810,y:560,w:180,h:32},{x:2080,y:675,w:340,h:40},
-    {x:2530,y:620,w:170,h:32},{x:2810,y:550,w:250,h:34},{x:3160,y:680,w:270,h:40},
-    {x:3510,y:590,w:180,h:34},{x:3800,y:520,w:210,h:36},{x:4080,y:735,w:120,h:50}
+    // Tutorial / warm-up: wide platforms and simple jumps.
+    {x:0,y:735,w:760,h:50},{x:790,y:690,w:330,h:40},{x:1150,y:630,w:290,h:35},
+    // Difficulty starts rising here.
+    {x:1490,y:690,w:190,h:40},{x:1735,y:560,w:145,h:32},{x:1960,y:675,w:300,h:40},
+    {x:2370,y:620,w:145,h:32},{x:2600,y:550,w:210,h:34},{x:2920,y:680,w:235,h:40},
+    {x:3250,y:590,w:155,h:34},{x:3490,y:520,w:170,h:34},{x:3740,y:735,w:120,h:50},
+    {x:3920,y:590,w:125,h:32},{x:4100,y:735,w:120,h:50}
   ];
   const spikes=[
-    {x:560,y:700,w:100,h:35},{x:700,y:720,w:120,h:15},{x:1130,y:650,w:80,h:30},
-    {x:1450,y:580,w:60,h:30},{x:1740,y:650,w:70,h:40},{x:1990,y:520,w:90,h:40},
-    {x:2395,y:640,w:105,h:35},{x:2740,y:680,w:70,h:40},{x:3060,y:650,w:100,h:35},
-    {x:3420,y:650,w:80,h:30},{x:3690,y:550,w:100,h:40}
+    // No lethal spikes in the tutorial zone.
+    {x:1500,y:650,w:62,h:40},{x:1710,y:520,w:60,h:40},{x:1880,y:650,w:70,h:40},
+    {x:2260,y:640,w:88,h:35},{x:2520,y:580,w:95,h:40},{x:2850,y:640,w:100,h:35},
+    {x:3170,y:650,w:82,h:30},{x:3400,y:490,w:90,h:40},{x:3650,y:690,w:90,h:45},
+    {x:3830,y:550,w:80,h:40},{x:4010,y:690,w:85,h:45}
   ];
   const movers=[
-    {x:735,y:610,w:75,h:22,min:710,max:805,s:1.8,t:0},
-    {x:1460,y:500,w:80,h:20,min:1430,max:1740,s:1.4,t:1.3},
-    {x:1990,y:455,w:82,h:20,min:1940,max:2320,s:1.7,t:2.1},
-    {x:2440,y:500,w:80,h:20,min:2400,max:2780,s:1.5,t:0.7},
-    {x:3010,y:540,w:75,h:20,min:2980,max:3260,s:1.7,t:1.5}
+    // First moving platform is slow and optional.
+    {x:740,y:625,w:100,h:22,min:735,max:790,s:.7,t:0},
+    // Harder moving sections.
+    {x:1480,y:500,w:72,h:20,min:1420,max:1690,s:1.7,t:1.3},
+    {x:1910,y:455,w:72,h:20,min:1840,max:2290,s:2.0,t:2.1},
+    {x:2380,y:500,w:72,h:20,min:2320,max:2670,s:1.9,t:0.7},
+    {x:3030,y:540,w:68,h:20,min:2950,max:3250,s:2.2,t:1.5},
+    {x:3550,y:455,w:65,h:20,min:3490,max:3750,s:2.3,t:.4}
   ];
-  const fakeFloor=[{x:1090,y:705,w:90,h:18},{x:2405,y:590,w:110,h:16},{x:3430,y:600,w:90,h:16}];
+  const fakeFloor=[
+    // First fake floor is removed from the tutorial. Trolls start later.
+    {x:2410,y:590,w:105,h:16},{x:2960,y:650,w:100,h:16},{x:3435,y:600,w:90,h:16}
+  ];
   const goal={x:4145,y:660,w:30,h:75};
 
   function resize(){const d=devicePixelRatio||1;c.width=innerWidth*d;c.height=innerHeight*d;ctx.setTransform(d,0,0,d,0,0);view.scale=Math.min(innerWidth/1100,innerHeight/720);if(innerWidth<800)view.scale=Math.min(innerWidth/700,innerHeight/720)}
@@ -53,7 +63,7 @@
   function timeText(ms){const s=ms/1000;return String(Math.floor(s/60)).padStart(2,'0')+':'+(s%60).toFixed(1).padStart(4,'0')}
   function updateHud(){ $('#deaths').textContent=deathCount;$('#time').textContent=timeText(elapsed);$('#best').textContent=best?timeText(Number(best)):'--:--.-' }
   function resizeWorldView(){
-    const targetX=player.x-innerWidth*.33/view.scale;
+    const targetX=player.x-innerWidth*.30/view.scale;
     view.x=Math.max(0,Math.min(world.w-innerWidth/view.scale,targetX));
     view.y=Math.max(0,Math.min(world.h-innerHeight/view.scale,world.h-innerHeight/view.scale));
   }

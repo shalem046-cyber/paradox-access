@@ -402,3 +402,20 @@ html,body{
   .stat-preview{grid-column:auto}
   .meme-preview img{width:90px;height:90px}
 }
+
+.system-thought{
+  width:fit-content;
+  max-width:100%;
+  margin:18px auto 0;
+  border:1px solid rgba(251,248,242,.07);
+  background:rgba(20,18,31,.55);
+  color:#776e80;
+  border-radius:999px;
+  padding:8px 12px;
+  font:8px 'DM Mono',monospace;
+  text-align:center;
+}
+.system-thought::before{content:"● ";color:var(--pink)}
+@media(max-width:680px){
+  .system-thought{font-size:7px;line-height:1.4;border-radius:12px}
+}

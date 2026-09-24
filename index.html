@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#05070b" />
+  <title>PARADOX//ACCESS</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="scanline"></div>
+
+  <header class="topbar">
+    <button id="statusDot" class="status-dot" aria-label="System status"></button>
+    <div class="brand">PARADOX<span>//</span>ACCESS</div>
+    <div class="header-meta">
+      <span id="node">NODE PA-01</span>
+      <span id="status">LOCKED</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="login" class="screen active">
+      <div class="hero">
+        <div class="eyebrow">AUTHENTICATION LAYER // 01</div>
+        <h1>ACCESS<br><span>DENIED.</span></h1>
+        <p class="lead">
+          This terminal does not care whether you know the password.
+          It wants to know whether you understand the interface.
+        </p>
+
+        <div class="terminal">
+          <div class="terminal-head">
+            <span>SECURE ACCESS TERMINAL</span>
+            <span id="signal">● OFFLINE</span>
+          </div>
+
+          <div class="terminal-body">
+            <label for="accessId">ACCESS ID</label>
+            <input id="accessId" autocomplete="off" placeholder="ENTER ACCESS ID" />
+
+            <label for="passcode">PASSCODE</label>
+            <input id="passcode" type="password" autocomplete="off" placeholder="ENTER PASSCODE" />
+
+            <button id="accessBtn" class="access-btn">REQUEST ACCESS</button>
+
+            <div id="console" class="console">&gt; awaiting credential signature...</div>
+
+            <div class="meta-row">
+              <span id="attempts">ATTEMPTS: 0</span>
+              <span id="lockState">LOCK: OPEN</span>
+              <span>INTRUDERS: PROBABLY YOU</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tiny-row">
+          <span>AUTH NODE: PA-01</span>
+          <span>DIRECT CREDENTIAL PATH: UNAVAILABLE</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="welcome" class="screen centered">
+      <div class="eyebrow">CREATOR CHANNEL ACCEPTED</div>
+      <h2>YOU FOUND THE<br><span>WAY IN.</span></h2>
+      <p id="welcomeText"></p>
+      <button id="enterExperience" class="access-btn compact">ENTER SYSTEM</button>
+    </section>
+
+    <section id="experience" class="screen">
+      <div class="experience-shell">
+        <div class="eyebrow">SYSTEM INTERFACE // 02</div>
+        <h2>The login was the first puzzle.</h2>
+        <p class="lead small">
+          There is no dashboard. There is only a system that expects you to look closer.
+        </p>
+
+        <div class="cards">
+          <article class="card">
+            <span>01</span>
+            <h3>THE OBVIOUS</h3>
+            <p>Credentials are exactly where you expect them to be.</p>
+          </article>
+          <article class="card">
+            <span>02</span>
+            <h3>THE UNEXPECTED</h3>
+            <p>The terminal reacts to attention, not just input.</p>
+          </article>
+          <article class="card">
+            <span>03</span>
+            <h3>THE PARADOX</h3>
+            <p>The system says access is impossible. Yet you are already inside.</p>
+          </article>
+        </div>
+
+        <div class="system-log">
+          <div>&gt; authentication layer ............ BYPASSED</div>
+          <div>&gt; user assumption .................. REJECTED</div>
+          <div>&gt; curiosity ........................ ACCEPTED</div>
+          <div>&gt; paradox state .................... ACTIVE</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>

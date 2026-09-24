@@ -3,119 +3,72 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#090811">
-<title>PARADOX//ACCESS — GAME</title>
+<meta name="theme-color" content="#09090f">
+<title>PARADOX//ACCESS — RAGE MODE</title>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="bg-grid"></div>
-<div class="fx fx-a"></div><div class="fx fx-b"></div>
+<canvas id="game" aria-label="PARADOX rage platform game"></canvas>
 
-<main id="app">
-  <header class="hud">
-    <button class="logo" id="logo" aria-label="Paradox">
-      <span class="logo-mark">P</span><span>PARADOX<span>//</span>ACCESS</span>
-    </button>
-    <div class="hud-center">
-      <div><small>LEVEL</small><b id="hudLevel">--</b></div>
-      <div><small>SCORE</small><b id="hudScore">0000</b></div>
-      <div><small>LIVES</small><b id="hudLives">♥♥♥</b></div>
-    </div>
-    <button class="sound" id="soundBtn" aria-label="Toggle sound">🔊</button>
-  </header>
-
-  <section class="screen show" id="home">
-    <div class="home-wrap">
-      <div class="home-copy">
-        <div class="eyebrow">A SMALL GAME WITH BIG TRUST ISSUES</div>
-        <h1>DON'T JUST<br><span>LOG IN.</span><br>PLAY THE LOGIN.</h1>
-        <p>Three fast challenges. Funny consequences. One very suspicious website.</p>
-        <button class="hero-btn" id="startBtn"><span>START GAME</span><b>→</b></button>
-        <button class="mini-btn" id="rulesBtn">how does this work?</button>
-      </div>
-
-      <div class="hero-machine">
-        <div class="machine-top"><span>PARADOX TERMINAL</span><i>● LIVE</i></div>
-        <div class="machine-screen">
-          <div class="scan"></div>
-          <div class="face">ಠ‿ಠ</div>
-          <div class="machine-word">READY?</div>
-          <div class="machine-note">tap the button before you regret it</div>
-        </div>
-        <div class="machine-bottom">
-          <span class="led pink"></span><span class="led lime"></span><span class="bar"></span><span class="machine-small">NO DOWNLOAD</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="home-cards">
-      <div class="home-card"><span>01</span><b>LOGIN PANIC</b><p>Build the password before the timer laughs at you.</p></div>
-      <div class="home-card pink"><span>02</span><b>RUNNING BUTTON</b><p>The button does not want to be clicked. Good luck.</p></div>
-      <div class="home-card lime"><span>03</span><b>CAT MEMORY</b><p>Watch. Remember. Tap. Don't embarrass yourself.</p></div>
-    </div>
-    <div class="home-bottom">PHONE FRIENDLY • NO ACCOUNT NEEDED • MEMES INCLUDED</div>
-  </section>
-
-  <section class="screen" id="rules">
-    <div class="modal-card">
-      <div class="eyebrow">HOW TO PLAY</div>
-      <h2>Very simple.</h2>
-      <div class="rules-grid">
-        <div><b>01</b><span>Beat each level.</span></div>
-        <div><b>02</b><span>Wrong moves cost a life.</span></div>
-        <div><b>03</b><span>Funny reactions are intentional.</span></div>
-        <div><b>04</b><span>Some things are hidden on purpose.</span></div>
-      </div>
-      <button class="mini-btn filled" id="rulesBack">got it</button>
-    </div>
-  </section>
-
-  <section class="screen" id="game">
-    <div class="game-head">
-      <div>
-        <div class="eyebrow" id="levelEyebrow">LEVEL 01</div>
-        <h2 id="levelTitle">LOGIN PANIC</h2>
-        <p id="levelDesc">Build the correct code.</p>
-      </div>
-      <div class="timer"><small>TIME</small><b id="timer">30</b></div>
-    </div>
-
-    <div class="stage">
-      <div class="stage-main" id="stageMain"></div>
-      <aside class="reaction" id="reaction">
-        <img id="reactionImg" src="assets/dog-reaction.svg" alt="Funny reaction">
-        <div class="reaction-tag">SYSTEM REACTION</div>
-        <p id="reactionText">the dog is watching.</p>
-      </aside>
-    </div>
-  </section>
-
-  <section class="screen" id="win">
-    <div class="win">
-      <div class="win-face">😎</div>
-      <div class="eyebrow">RUN COMPLETE</div>
-      <h2>YOU SURVIVED.</h2>
-      <p id="winText">The system has reluctantly accepted your existence.</p>
-      <div class="win-stats">
-        <div><small>SCORE</small><b id="winScore">0000</b></div>
-        <div><small>LIVES</small><b id="winLives">♥♥♥</b></div>
-        <div><small>STATUS</small><b>STILL SUSPICIOUS</b></div>
-      </div>
-      <div class="win-actions">
-        <button class="hero-btn" id="againBtn">PLAY AGAIN →</button>
-        <button class="mini-btn" id="copyBtn">copy result</button>
-      </div>
-    </div>
-  </section>
-</main>
-
-<div class="meme-popup" id="memePopup">
-  <img id="popupImg" src="assets/dog-reaction.svg" alt="">
-  <div><span id="popupTag">BRO...</span><b id="popupText">you really clicked that.</b></div>
+<div class="hud">
+  <div class="brand"><span>P</span> PARADOX<span>//</span>RAGE</div>
+  <div class="hud-center">
+    <div><small>DEATHS</small><b id="deaths">0</b></div>
+    <div><small>TIME</small><b id="time">00:00.0</b></div>
+    <div><small>BEST</small><b id="best">--:--.-</b></div>
+  </div>
+  <div class="hud-right">
+    <button id="restart" class="hud-btn">↻</button>
+    <button id="sound" class="hud-btn">🔊</button>
+  </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="intro-layer" id="intro">
+  <div class="intro-card">
+    <div class="eyebrow">PARADOX//RAGE MODE</div>
+    <h1>YOU WILL<br><span>REGRET THIS.</span></h1>
+    <p>Get the square to the door. The level is short. The traps are not.</p>
+    <div class="controls-row">
+      <span>PC: A D / ← → + SPACE</span>
+      <span>PHONE: TOUCH CONTROLS</span>
+    </div>
+    <button id="start" class="start-btn">START THE PAIN →</button>
+  </div>
+</div>
+
+<div class="level-banner" id="banner">
+  <div class="banner-box">
+    <span id="bannerSmall">SECTION COMPLETE</span>
+    <strong id="bannerTitle">NICE TRY.</strong>
+  </div>
+</div>
+
+<div class="meme" id="meme">
+  <img id="memeImg" src="assets/dog-reaction.svg" alt="">
+  <div>
+    <small>PARADOX SYSTEM</small>
+    <strong id="memeText">bro...</strong>
+  </div>
+</div>
+
+<div class="mobile-controls" id="mobileControls">
+  <button class="touch-btn left" data-key="left">◀</button>
+  <button class="touch-btn jump" data-key="jump">▲</button>
+  <button class="touch-btn right" data-key="right">▶</button>
+</div>
+
+<div class="finish" id="finish">
+  <div class="finish-card">
+    <div class="eyebrow">LEVEL COMPLETE</div>
+    <div class="finish-face">😵‍💫</div>
+    <h2>YOU ACTUALLY<br>DID IT.</h2>
+    <p id="finishText">The system is disappointed that you survived.</p>
+    <div class="finish-stats"><span>DEATHS <b id="finishDeaths">0</b></span><span>TIME <b id="finishTime">00:00.0</b></span></div>
+    <button id="again" class="start-btn">RUN IT AGAIN →</button>
+  </div>
+</div>
+
 <script src="script.js"></script>
 </body>
 </html>

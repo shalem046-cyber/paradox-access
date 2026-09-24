@@ -480,12 +480,12 @@
         <div class="challenge-copy">The system displays six nodes. Only one has a valid checksum relationship. Do not trust the large label.</div>
       </div></div>
       <div class="choice-grid challenge-area" id="nodeChoices">
-        <button class="choice" data-node="A"><small>NODE-A / 71</small><strong>STABLE</strong></button>
-        <button class="choice" data-node="B"><small>NODE-B / 42</small><strong>STABLE</strong></button>
-        <button class="choice" data-node="C"><small>NODE-C / 17</small><strong>UNSTABLE</strong></button>
-        <button class="choice" data-node="D"><small>NODE-D / 84</small><strong>STABLE</strong></button>
-        <button class="choice" data-node="E"><small>NODE-E / 29</small><strong>STABLE</strong></button>
-        <button class="choice" data-node="F"><small>NODE-F / 56</small><strong>DECOY</strong></button>
+        <button class="choice" data-node="A"><small>NODE-A / 11</small><strong>STABLE</strong></button>
+        <button class="choice" data-node="B"><small>NODE-B / 7</small><strong>STABLE</strong></button>
+        <button class="choice" data-node="C"><small>NODE-C / 15</small><strong>UNSTABLE</strong></button>
+        <button class="choice" data-node="D"><small>NODE-D / 24</small><strong>STABLE</strong></button>
+        <button class="choice" data-node="E"><small>NODE-E / 31</small><strong>STABLE</strong></button>
+        <button class="choice" data-node="F"><small>NODE-F / 88</small><strong>DECOY</strong></button>
       </div>
       <div class="micro-note">VERIFICATION RULE: NODE NUMBER × 2 + 3 must equal its displayed checksum.</div>
       <div class="action-row"><button class="action-btn danger" id="obviousBtn">CLICK THE OBVIOUS ONE</button></div>
@@ -645,7 +645,7 @@
 
     $("#logicBtn").addEventListener("click",()=>{
       const answer=$("#logicAnswer").value.trim();
-      if(answer==="1010"){
+      if(answer==="1100"){
         $("#stageFeedback").className="feedback-box good";
         $("#stageFeedback").textContent="RELAY OPEN. XOR did not betray you this time.";
         reward(400,"Stage 04 recovered. Logic relay accepted.");

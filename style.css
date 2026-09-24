@@ -16,3 +16,15 @@ canvas{position:fixed;inset:0;width:100vw;height:100vh;display:block;background:
 .meme{position:fixed;right:18px;bottom:18px;width:230px;background:#f2e8db;color:#14111a;border-radius:18px;overflow:hidden;box-shadow:0 22px 60px rgba(0,0,0,.4);z-index:22;transform:translateY(18px) scale(.94);opacity:0;pointer-events:none}.meme.show{animation:memeIn 2.2s ease}.meme img{width:100%;height:150px;object-fit:cover;background:#ffd5e6}.meme div{padding:10px 12px 13px}.meme small{display:block;font:7px 'DM Mono',monospace;color:#726877}.meme strong{display:block;font-size:12px;line-height:1.2;margin-top:4px}@keyframes memeIn{10%,82%{opacity:1;transform:none}100%{opacity:0;transform:translateY(15px) scale(.96)}}
 .mobile-controls{display:none;position:fixed;left:0;right:0;bottom:0;padding:14px max(16px,env(safe-area-inset-left)) max(16px,env(safe-area-inset-bottom));justify-content:space-between;z-index:18;pointer-events:none}.touch-btn{pointer-events:auto;width:72px;height:60px;border-radius:18px;border:1px solid rgba(255,255,255,.12);background:rgba(16,15,25,.82);color:#fff;font-size:22px;backdrop-filter:blur(10px)}.touch-btn.jump{background:rgba(201,255,103,.82);color:#111}.finish-face{font-size:76px;margin:16px 0}.finish-stats{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}.finish-stats span{border:1px solid rgba(255,255,255,.1);background:#0b0b12;padding:10px 12px;border-radius:11px;font:8px 'DM Mono',monospace;color:#777080}.finish-stats b{color:var(--lime);margin-left:8px}
 @media(max-width:800px){.hud{top:7px;left:7px;right:7px}.brand{font-size:9px}.hud-center{gap:4px}.hud-center div{min-width:48px}.hud-center div:first-child{display:none}.meme{width:170px;right:10px;bottom:92px}.meme img{height:108px}.mobile-controls{display:flex}.intro-card,.finish-card{padding:25px}.intro-card h1,.finish-card h2{font-size:54px}.controls-row{font-size:7px}}
+
+/* ===== RAGE MODE MOTION PASS ===== */
+#game{will-change:transform}
+.canvas-shake{animation:screenShake .22s steps(5,end)}
+@keyframes screenShake{
+  0%{transform:translate(0,0)}
+  20%{transform:translate(-7px,3px)}
+  40%{transform:translate(6px,-4px)}
+  60%{transform:translate(-4px,5px)}
+  80%{transform:translate(3px,-2px)}
+  100%{transform:translate(0,0)}
+}

@@ -1,32 +1,30 @@
-# PARADOX//ACCESS
+# PARADOX//ACCESS — THE GAME
 
-A playful, mobile-first web experience where the interface has a personality.
+A funny mobile-first browser game where the website itself becomes the playground.
 
-## What is included
+## Game flow
 
-- Normal, easy-to-understand landing page
-- Public Explore / Memes / About sections
-- Demo login + guest access
-- Funny wrong-login reactions
-- Original dog and cat reaction artwork
-- Hidden creator override route after repeated failed attempts
-- Responsive navigation and layout for phones
-- No backend or database required for the current demo
+Start Game → Mission Select → Level 01 Login Lock → Level 02 Don't Press → Level 03 Cat Memory → Win.
 
-## Demo access
+The login is intentionally easy to enter for normal players, while repeated wrong attempts trigger meme reactions and reveal that the interface has hidden interactions.
+
+## Demo login
 
 Access ID: `guest`
-
 Passcode: `paradox`
 
-## Creator route
+## Hidden creator interaction
 
-The login has a hidden puzzle route after the direct credential path is sealed. It is intentionally a front-end interaction rather than real authentication.
+After three failed login attempts in Level 01, there is a creator-only puzzle route based on interacting with the logo, a modifier key, and an encoded keyboard sequence. This is an entertainment mechanic, not real authentication.
 
-## Run locally
+## Features
 
-Open `index.html` in a browser or serve the folder with any static server.
-
-## GitHub Pages
-
-This project is compatible with GitHub Pages because it uses plain HTML, CSS and JavaScript with relative asset paths.
+- Responsive browser game UI
+- Score / XP / lives HUD
+- Three playable mini-levels
+- Dog/cat reaction memes
+- Original SVG meme artwork
+- Optional UI sounds using Web Audio
+- Local score persistence
+- No backend required
+- GitHub Pages compatible

@@ -366,14 +366,37 @@
   });
 
   document.addEventListener("keydown", (event) => {
-    if(!state.locked || !state.armed || state.unlocked) return;
+    if(!state.locked || state.unlocked) return;
 
     const key = event.key.length === 1 ? event.key.toUpperCase() : event.key.toUpperCase();
+
+    // Secret route:
+    // 1) lock the system
+    // 2) click PARADOX//ACCESS three times
+    // 3) type PARADOX
+    // Shift+status-dot still arms the same creator channel for the original route.
+    if(state.logoClicks === 3 && !state.armed){
+      if(key === creatorKey[state.keyIndex]){
+        state.keyIndex++;
+        feedback("auxiliary creator channel: " + state.keyIndex + "/" + creatorKey.length, "");
+        if(state.keyIndex === creatorKey.length){
+          unlock();
+        }
+        return;
+      }
+
+      if(!["SHIFT","CONTROL","ALT"].includes(key)){
+        state.keyIndex = 0;
+        feedback("wrong creator signal. sequence reset.", "bad");
+        return;
+      }
+    }
+
+    if(!state.armed) return;
 
     if(key === creatorKey[state.keyIndex]){
       state.keyIndex++;
       feedback("creator channel: " + state.keyIndex + "/" + creatorKey.length, "");
-
       if(state.keyIndex === creatorKey.length){
         unlock();
       }

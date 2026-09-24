@@ -69,7 +69,7 @@
   function onDanger(){
     if(player.y>world.h+100)return true;
     for(const s of spikes)if(rectHit(player,s))return true;
-    for(const f of fakeFloor)if(rectHit(player,f))return false;
+    for(const f of fakeFloor)if(rectHit(player,f))return true;
     return false
   }
   function respawn(reason){

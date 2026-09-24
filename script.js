@@ -32,8 +32,8 @@
   }
 
   // =========================
-  // FRUSTRATION ENGINE
-  // Intentionally annoying, always recoverable.
+  // PARADOX EVADE ENGINE
+  // Fast, smooth and intentionally difficult — but always recoverable.
   // =========================
   const troll = {
     idDodges: 0,
@@ -44,39 +44,64 @@
   };
 
   const trollMessages = [
-    "That field moved. You definitely saw that.",
-    "Excellent click. Completely useless.",
-    "The interface has decided it dislikes you.",
+    "The interface noticed your cursor.",
+    "Too slow. The box moved first.",
+    "You were close. The system disagrees.",
+    "The control terminal has developed survival instincts.",
     "Please remain calm. The interface will not.",
-    "Your confidence is noted and ignored.",
-    "Almost. Emotionally, at least.",
-    "The system would like you to try something less reasonable."
+    "Excellent approach. Terrible timing."
   ];
 
   function trollMessage(index = Math.floor(Math.random() * trollMessages.length), type = ""){
     feedback(trollMessages[index % trollMessages.length], type);
   }
 
-  function dodge(el, intensity = 1){
+  function clamp(value, min, max){
+    return Math.min(Math.max(value, min), max);
+  }
+
+  function evade(el, intensity = 1){
     if(state.locked || state.unlocked) return;
 
-    const now = Date.now();
-    if(now - troll.lastMove < 120) return;
+    const body = document.querySelector(".terminal-body");
+    if(!body || !el) return;
+
+    const bodyRect = body.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    const now = performance.now();
+
+    if(now - troll.lastMove < 70) return;
     troll.lastMove = now;
 
-    const x = Math.round((Math.random() * 2 - 1) * (45 + intensity * 12));
-    const y = Math.round((Math.random() * 2 - 1) * (10 + intensity * 5));
+    const padding = 12;
+    const maxX = Math.max(0, bodyRect.width - elRect.width - padding * 2);
+    const maxY = Math.max(0, bodyRect.height - elRect.height - padding * 2);
 
-    el.classList.remove("troll-move");
-    void el.offsetWidth;
-    el.classList.add("troll-move");
-    el.style.transform = "translate(" + x + "px," + y + "px)";
+    // Choose a distant point rather than a random tiny nudge.
+    const currentX = elRect.left - bodyRect.left - el.offsetLeft;
+    const currentY = elRect.top - bodyRect.top - el.offsetTop;
+
+    let x = Math.random() * maxX;
+    let y = Math.random() * maxY;
+
+    for(let i = 0; i < 8; i++){
+      const dx = x - currentX;
+      const dy = y - currentY;
+      if(Math.hypot(dx, dy) > 110 + intensity * 24) break;
+      x = Math.random() * maxX;
+      y = Math.random() * maxY;
+    }
+
+    el.style.position = "relative";
+    el.style.transition = "transform 90ms cubic-bezier(.1,.9,.15,1)";
+    el.style.transform = `translate(${x - currentX}px,${y - currentY}px)`;
     el.classList.add("troll-dodge");
+
     setTimeout(() => {
       if(!state.locked && !state.unlocked){
-        el.style.transform = "translate(0,0)";
+        el.style.transition = "transform 220ms cubic-bezier(.2,.8,.15,1)";
       }
-    }, 700);
+    }, 95);
   }
 
   function trollFieldFocus(el, kind){
@@ -84,28 +109,75 @@
 
     if(kind === "id"){
       troll.idDodges++;
-      if(troll.idDodges <= 7){
-        dodge(el, troll.idDodges);
+      if(troll.idDodges <= 10){
+        evade(el, Math.min(5, troll.idDodges));
         const messages = [
-          "ACCESS ID selected. Unfortunately, it moved.",
-          "You found the username field. It found a new location.",
-          "The ACCESS ID has requested personal space.",
-          "Stop chasing the box. The box is faster."
+          "ACCESS ID detected. Evasive maneuver initiated.",
+          "You found the username field. It found somewhere else.",
+          "ACCESS ID is refusing to be perceived.",
+          "Cursor proximity: unacceptable.",
+          "The box has learned your movement."
         ];
         feedback(messages[(troll.idDodges - 1) % messages.length], "bad");
       }
     } else {
       troll.passDodges++;
-      if(troll.passDodges <= 5){
-        dodge(el, troll.passDodges);
+      if(troll.passDodges <= 8){
+        evade(el, Math.min(5, troll.passDodges));
         const messages = [
-          "PASSCODE field unavailable due to mysterious reasons.",
-          "Password box moved. Security is apparently athletic.",
-          "Correct field. Wrong universe."
+          "PASSCODE target acquired. Target relocating.",
+          "Password box has entered evasive mode.",
+          "Correct field. Wrong moment.",
+          "Authentication control moving beyond your reach."
         ];
         feedback(messages[(troll.passDodges - 1) % messages.length], "bad");
       }
     }
+  }
+
+  function fakeValidate(){
+    if(state.locked || state.unlocked) return;
+
+    const id = $("#accessId");
+    const pass = $("#passcode");
+    const idValue = id.value.trim();
+    const passValue = pass.value.trim();
+
+    if(!idValue && !passValue){
+      feedback("You entered absolutely nothing. Bold strategy.");
+      evade(id, 3);
+      return;
+    }
+
+    troll.fakeChecks++;
+    const terminal = document.querySelector(".terminal");
+    terminal.classList.add("troll-glitch");
+    setTimeout(() => terminal.classList.remove("troll-glitch"), 220);
+
+    if(idValue.length >= 3 && passValue.length >= 3){
+      feedback("credentials accepted... validating confidence...", "ok");
+      setTimeout(() => {
+        if(!state.locked && !state.unlocked){
+          feedback("Confidence rejected. Credentials remain suspicious.", "bad");
+          $("#signal").textContent = "● MOCKING";
+          $("#signal").style.color = "var(--amber)";
+          evade(id, 4);
+          evade(pass, 4);
+        }
+      }, 520);
+      return;
+    }
+
+    const fakeErrors = [
+      "ACCESS DENIED: your password looked nervous.",
+      "ACCESS DENIED: insufficient confidence.",
+      "ACCESS DENIED: username passed. Password failed the vibe check.",
+      "ACCESS DENIED: system has chosen violence."
+    ];
+
+    feedback(fakeErrors[(troll.fakeChecks - 1) % fakeErrors.length], "bad");
+    evade(id, troll.fakeChecks);
+    evade(pass, troll.fakeChecks);
   }
 
   function fakeValidate(){
@@ -203,31 +275,47 @@
   $("#accessId").addEventListener("focus", () => trollFieldFocus($("#accessId"), "id"));
   $("#passcode").addEventListener("focus", () => trollFieldFocus($("#passcode"), "pass"));
 
-  $("#accessId").addEventListener("pointerenter", () => {
-    if(!state.locked && !state.unlocked && troll.idDodges < 9) trollFieldFocus($("#accessId"), "id");
-  });
-
-  $("#passcode").addEventListener("pointerenter", () => {
-    if(!state.locked && !state.unlocked && troll.passDodges < 7) trollFieldFocus($("#passcode"), "pass");
-  });
-
-  $("#accessBtn").addEventListener("pointerenter", () => {
+  document.addEventListener("pointermove", (event) => {
     if(state.locked || state.unlocked) return;
-    troll.buttonDodges++;
-    if(troll.buttonDodges <= 4){
-      dodge($("#accessBtn"), troll.buttonDodges);
-      $("#accessBtn").classList.add("troll-hover");
-      setTimeout(() => $("#accessBtn").classList.remove("troll-hover"), 240);
-      feedback(
-        troll.buttonDodges === 1
-          ? "The button moved. You are being tested."
-          : troll.buttonDodges === 2
-            ? "You almost clicked it. The button disagreed."
-            : troll.buttonDodges === 3
-              ? "This is getting embarrassing for both of us."
-              : "Fine. Click the button before it develops legs.",
-        "bad"
-      );
+
+    const targets = [
+      { el: $("#accessId"), kind: "id", radius: 95 },
+      { el: $("#passcode"), kind: "pass", radius: 105 },
+      { el: $("#accessBtn"), kind: "button", radius: 115 }
+    ];
+
+    for(const target of targets){
+      const el = target.el;
+      if(!el) continue;
+
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const distance = Math.hypot(event.clientX - cx, event.clientY - cy);
+
+      if(distance < target.radius){
+        if(target.kind === "id" && troll.idDodges < 12){
+          troll.idDodges++;
+          evade(el, Math.min(7, troll.idDodges));
+          trollMessage(troll.idDodges + 1, "bad");
+        } else if(target.kind === "pass" && troll.passDodges < 10){
+          troll.passDodges++;
+          evade(el, Math.min(7, troll.passDodges));
+          trollMessage(troll.passDodges + 2, "bad");
+        } else if(target.kind === "button" && troll.buttonDodges < 9){
+          troll.buttonDodges++;
+          evade(el, Math.min(7, troll.buttonDodges));
+          feedback(
+            troll.buttonDodges < 4
+              ? "The button detected your cursor."
+              : troll.buttonDodges < 7
+                ? "You are getting warmer. The button is not."
+                : "At this point, the button is just bullying you.",
+            "bad"
+          );
+        }
+        break;
+      }
     }
   });
 

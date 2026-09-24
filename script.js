@@ -1,8 +1,9 @@
 (() => {
   const state={
     level:1,score:0,lives:3,time:30,timer:null,sound:true,
-    login:{target:'',input:''},
+    login:{target:'',input:'',attempts:0},
     runner:{hits:0},
+    secret:{clicks:0,last:0,armed:false,index:0},
     memory:{seq:[],input:[],round:1,busy:false}
   };
   const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -108,7 +109,7 @@
   ];
   function loadLogin(){
     $('#levelTitle').textContent='LOGIN PANIC';$('#levelDesc').textContent='Build the 5-character access code before the timer dies.';
-    state.login=words[Math.floor(Math.random()*words.length)];state.login.input='';
+    state.login=words[Math.floor(Math.random()*words.length)];state.login.input='';state.login.attempts=0;state.secret={clicks:0,last:0,armed:false,index:0};
     $('#stageMain').innerHTML=`
       <div class="login-game">
         <div class="login-card-big">
@@ -133,8 +134,13 @@
       $('#reactionImg').src='assets/cat-reaction.svg';$('#reactionText').textContent='cat: acceptable. continue.';
       finishLevel();return;
     }
+    state.login.attempts++;
     const idx=Math.floor(Math.random()*reactions.length);
     $('#reactionImg').src=reactions[idx][0];$('#reactionText').textContent=reactions[idx][1];
+    if(state.login.attempts>=3){
+      $('#loginDesc').textContent='DIRECT LOGIN LOCKED. The system may be hiding another route.';
+      toast('three bad ideas detected. maybe stop guessing.');
+    }
     if(!loseLife(reactions[idx][1])){$('#codeInput').value='';}
   }
 
@@ -232,7 +238,52 @@
   $('#againBtn').addEventListener('click',start);
   $('#soundBtn').addEventListener('click',()=>{state.sound=!state.sound;$('#soundBtn').textContent=state.sound?'🔊':'🔇';audio.beep(600,.05)});
   $('#copyBtn').addEventListener('click',async()=>{const t='I scored '+state.score+' in PARADOX//ACCESS.';try{await navigator.clipboard.writeText(t);toast('RESULT COPIED');}catch{toast(t)}});
-  $('#logo').addEventListener('click',()=>{if(state.level===1)toast('the logo is innocent. probably.');});
+  $('#logo').addEventListener('click',()=> {
+    if(state.level!==1 || state.login.attempts<3) {
+      toast('the logo is innocent. probably.');
+      return;
+    }
+    const now=Date.now();
+    if(now-state.secret.last>1400) state.secret.clicks=0;
+    state.secret.last=now;
+    state.secret.clicks++;
+    if(state.secret.clicks===1) toast('...the logo blinked.');
+    if(state.secret.clicks===2) toast('that was suspicious.');
+    if(state.secret.clicks===3) toast('one more signal.');
+    if(state.secret.clicks>3){state.secret.clicks=0;toast('channel reset.');}
+  });
+
+  document.addEventListener('click',e=>{
+    if(state.level!==1 || state.login.attempts<3 || state.secret.clicks!==3 || state.secret.armed) return;
+    if(e.shiftKey && e.target.closest('#logo')){
+      state.secret.armed=true;
+      state.secret.index=0;
+      toast('creator channel armed.');
+    }
+  });
+
+  document.addEventListener('keydown',e=>{
+    if(!state.secret.armed || state.level!==1) return;
+    const secret='PAX26';
+    const k=e.key.toUpperCase();
+    if(k===secret[state.secret.index]){
+      state.secret.index++;
+      if(state.secret.index===secret.length){
+        state.secret.armed=false;
+        state.login.attempts=0;
+        $('#reactionImg').src='assets/dog-reaction.svg';
+        $('#reactionText').textContent='HOW DID YOU FIND THE BACK DOOR?';
+        addScore(600);
+        meme(0,'creator route unlocked. okay, boss.');
+        finishLevel();
+      }
+      return;
+    }
+    if(!['SHIFT','ALT','CONTROL'].includes(k)){
+      state.secret.armed=false;state.secret.index=0;
+      toast('creator signal mismatch.');
+    }
+  });
 
   hud();
 })();

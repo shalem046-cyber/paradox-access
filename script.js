@@ -306,7 +306,12 @@
   $('#guestBtn').addEventListener('click', guestAccess);
   $('#showPass').addEventListener('click', togglePassword);
   $('#exitCreator').addEventListener('click', exitCreator);
-  $('.brand').addEventListener('click', logoClick);
+  $('.brand').addEventListener('click', (event) => {
+    if (state.attempts >= 3 && !state.loggedIn && !state.creatorUnlocked) {
+      event.preventDefault();
+    }
+    logoClick();
+  });
   $('.status-dot').addEventListener('click', systemDotClick);
   document.addEventListener('keydown', handleCreatorKey);
 

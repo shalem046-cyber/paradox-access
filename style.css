@@ -65,3 +65,24 @@ input::placeholder{color:#42556c}
   .cards{grid-template-columns:1fr}
   .hero,.experience-shell{padding-top:7vh}
 }
+
+/* =========================
+   FRUSTRATION / TROLL LAYER
+   ========================= */
+.terminal-body{position:relative}
+.troll-move{transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+.troll-dodge{position:relative}
+.troll-glitch{animation:trollFlash .18s linear}
+@keyframes trollFlash{
+  0%{filter:none}
+  40%{filter:brightness(1.7) contrast(1.4)}
+  100%{filter:none}
+}
+.fake-success{color:var(--green)!important}
+.fake-fail{color:var(--red)!important}
+.frustration-note{margin-top:10px;min-height:18px;font:9px/1.6 monospace;color:#596d83;letter-spacing:.04em}
+@keyframes tinyHop{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-3px)}
+}
+.access-btn.troll-hover{animation:tinyHop .22s ease}

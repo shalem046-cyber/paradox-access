@@ -11,8 +11,8 @@
   const CREATOR_KEY='PX//7F-ACCESS';
   const pick=a=>a[Math.floor(Math.random()*a.length)];
   const memes=[
-    {src:'assets/memes/reaction-1.jpg',title:'BRO WHAT ARE YOU DOING?',caption:'You clicked the fake button. On purpose.'},
-    {src:'assets/memes/reaction-2.jpg',title:'AYYO 😭',caption:'The real button was literally right there.'}
+    {src:'assets/cat-reaction.svg',title:'BRO WHAT ARE YOU DOING?',caption:'You clicked the fake button. On purpose.'},
+    {src:'assets/dog-reaction.svg',title:'AYYO 😭',caption:'The real button was literally right there.'}
   ];
   const fakeLabels=['CONTINUE','I AM HUMAN','VERIFY','LOGIN','UNLOCK','ACCESS','SKIP','YES','REAL LOGIN','CONFIRM'];
   const fakeMessages=['That button looked real, right?','WRONG BUTTON 😭','Bro clicked the decoy.','The system saw that.','You trusted THIS?'];
@@ -43,9 +43,8 @@
   function clearFakes(){zone.innerHTML='';fakeCount=0}
 
   function spawnFake(n=2){
-    if(fakeCount>=8)return;
     const rect=card.getBoundingClientRect(),mobile=innerWidth<600;
-    for(let i=0;i<n&&fakeCount<8;i++){
+    for(let i=0;i<n&&fakeCount<10;i++){
       const b=document.createElement('button');
       b.type='button';b.className='fake-btn';b.textContent=pick(fakeLabels);
       const left=Math.max(8,Math.min(rect.width-110,Math.random()*(rect.width-120)));
@@ -136,14 +135,21 @@
     session.textContent=attempts>=3?'LOOPING':'REJECTED';pass.value='';bad(pass);
 
     if(attempts===1){
+      clearFakes();
       spawnFake(3);
       subtitle.textContent='Fine. Now there are buttons that look useful.';
     }else if(attempts===2){
-      spawnFake(3);moveRealButton();
+      clearFakes();
+      spawnFake(5);
+      moveRealButton();
       eyebrow.textContent='RESTRICTED TERMINAL // DECOYS DEPLOYED';
+      subtitle.textContent='Five buttons. One real control. Probably.';
     }else{
-      spawnFake(2);moveRealButton();
+      clearFakes();
+      spawnFake(Math.min(8,5+attempts-2));
+      moveRealButton();
       systemStatus.textContent='SYSTEM: ENJOYING THIS';
+      subtitle.textContent='The interface is getting worse. You are still clicking.';
       if(attempts>=4)eyebrow.textContent='RESTRICTED TERMINAL // ABSOLUTELY NOT';
     }
   });

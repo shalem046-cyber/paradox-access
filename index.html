@@ -15,29 +15,29 @@
 
     <header class="topbar">
       <div class="brand"><span class="mark">P</span><span>PARADOX<span class="slash">//</span>ACCESS</span></div>
-      <div class="status"><i></i>SYSTEM ONLINE</div>
+      <div class="status"><i></i><span id="systemStatus">SYSTEM ONLINE</span></div>
     </header>
 
     <section class="login-shell" aria-label="Login">
-      <div class="login-card">
-        <div class="eyebrow">RESTRICTED TERMINAL</div>
+      <div class="login-card" id="card">
+        <div class="eyebrow" id="eyebrow">RESTRICTED TERMINAL</div>
         <h1>ACCESS<br><span>REQUIRED.</span></h1>
-        <p class="subtitle">Authentication is mandatory. Nothing beyond this terminal exists.</p>
+        <p class="subtitle" id="subtitle">Authentication is mandatory. Nothing beyond this terminal exists.</p>
 
         <form id="loginForm" autocomplete="off">
-          <label for="username">IDENTIFIER</label>
+          <label for="username" id="userLabel">IDENTIFIER</label>
           <input id="username" name="username" type="text" placeholder="Enter identifier" spellcheck="false" required>
 
-          <label for="password">ACCESS KEY</label>
+          <label for="password" id="passLabel">ACCESS KEY</label>
           <input id="password" name="password" type="password" placeholder="Enter access key" required>
 
-          <button type="submit">AUTHENTICATE <span>→</span></button>
+          <button id="loginButton" type="submit">AUTHENTICATE <span>→</span></button>
         </form>
 
         <div id="message" class="message" aria-live="polite"></div>
 
         <div class="meta">
-          <span>PARADOX NODE 01</span>
+          <span id="attempts">ATTEMPTS: 0</span>
           <span>SESSION: <b id="session">LOCKED</b></span>
         </div>
       </div>

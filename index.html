@@ -1,74 +1,50 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#09090f">
-<title>PARADOX//ACCESS — RAGE MODE</title>
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07080c">
+  <title>PARADOX//ACCESS</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<canvas id="game" aria-label="PARADOX rage platform game"></canvas>
+  <main class="page">
+    <div class="grain"></div>
+    <div class="grid"></div>
 
-<div class="hud">
-  <div class="brand"><span>P</span> PARADOX<span>//</span>RAGE</div>
-  <div class="hud-center">
-    <div><small>DEATHS</small><b id="deaths">0</b></div>
-    <div><small>TIME</small><b id="time">00:00.0</b></div>
-    <div><small>BEST</small><b id="best">--:--.-</b></div>
-  </div>
-  <div class="hud-right">
-    <button id="restart" class="hud-btn">↻</button>
-    <button id="sound" class="hud-btn">🔊</button>
-  </div>
-</div>
+    <header class="topbar">
+      <div class="brand"><span class="mark">P</span><span>PARADOX<span class="slash">//</span>ACCESS</span></div>
+      <div class="status"><i></i>SYSTEM ONLINE</div>
+    </header>
 
-<div class="intro-layer" id="intro">
-  <div class="intro-card">
-    <div class="eyebrow">PARADOX//RAGE MODE</div>
-    <h1>YOU WILL<br><span>REGRET THIS.</span></h1>
-    <p>Get the square to the door. The level is short. The traps are not.</p>
-    <div class="controls-row">
-      <span>PC: A D / ← → + SPACE</span>
-      <span>PHONE: TOUCH CONTROLS</span>
-    </div>
-    <button id="start" class="start-btn">START THE PAIN →</button>
-  </div>
-</div>
+    <section class="login-shell" aria-label="Login">
+      <div class="login-card">
+        <div class="eyebrow">RESTRICTED TERMINAL</div>
+        <h1>ACCESS<br><span>REQUIRED.</span></h1>
+        <p class="subtitle">Authentication is mandatory. Nothing beyond this terminal exists.</p>
 
-<div class="level-banner" id="banner">
-  <div class="banner-box">
-    <span id="bannerSmall">SECTION COMPLETE</span>
-    <strong id="bannerTitle">NICE TRY.</strong>
-  </div>
-</div>
+        <form id="loginForm" autocomplete="off">
+          <label for="username">IDENTIFIER</label>
+          <input id="username" name="username" type="text" placeholder="Enter identifier" spellcheck="false" required>
 
-<div class="meme" id="meme">
-  <img id="memeImg" src="assets/dog-reaction.svg" alt="">
-  <div>
-    <small>PARADOX SYSTEM</small>
-    <strong id="memeText">bro...</strong>
-  </div>
-</div>
+          <label for="password">ACCESS KEY</label>
+          <input id="password" name="password" type="password" placeholder="Enter access key" required>
 
-<div class="mobile-controls" id="mobileControls">
-  <button class="touch-btn left" data-key="left">◀</button>
-  <button class="touch-btn jump" data-key="jump">▲</button>
-  <button class="touch-btn right" data-key="right">▶</button>
-</div>
+          <button type="submit">AUTHENTICATE <span>→</span></button>
+        </form>
 
-<div class="finish" id="finish">
-  <div class="finish-card">
-    <div class="eyebrow">LEVEL COMPLETE</div>
-    <div class="finish-face">😵‍💫</div>
-    <h2>YOU ACTUALLY<br>DID IT.</h2>
-    <p id="finishText">The system is disappointed that you survived.</p>
-    <div class="finish-stats"><span>DEATHS <b id="finishDeaths">0</b></span><span>TIME <b id="finishTime">00:00.0</b></span></div>
-    <button id="again" class="start-btn">RUN IT AGAIN →</button>
-  </div>
-</div>
+        <div id="message" class="message" aria-live="polite"></div>
 
-<script src="script.js"></script>
+        <div class="meta">
+          <span>PARADOX NODE 01</span>
+          <span>SESSION: <b id="session">LOCKED</b></span>
+        </div>
+      </div>
+    </section>
+
+    <footer>© 2026 PARADOX SYSTEMS <span>•</span> AUTHORIZED USERS ONLY</footer>
+  </main>
+  <script src="script.js"></script>
 </body>
 </html>

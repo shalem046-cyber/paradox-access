@@ -1,50 +1,59 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#07080c">
-  <title>PARADOX//ACCESS</title>
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07080c">
+<title>PARADOX//ACCESS</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="page">
-    <div class="grain"></div>
-    <div class="grid"></div>
+<main class="page">
+  <div class="grain"></div><div class="grid"></div>
+  <header class="topbar">
+    <div class="brand"><span class="mark">P</span><span>PARADOX<span class="slash">//</span>ACCESS</span></div>
+    <div class="status"><i></i><span id="systemStatus">SYSTEM ONLINE</span></div>
+  </header>
 
-    <header class="topbar">
-      <div class="brand"><span class="mark">P</span><span>PARADOX<span class="slash">//</span>ACCESS</span></div>
-      <div class="status"><i></i><span id="systemStatus">SYSTEM ONLINE</span></div>
-    </header>
+  <section class="login-shell" aria-label="Login">
+    <div class="login-card" id="card">
+      <div class="eyebrow" id="eyebrow">RESTRICTED TERMINAL</div>
+      <h1>ACCESS<br><span>REQUIRED.</span></h1>
+      <p class="subtitle" id="subtitle">Authentication is mandatory. Nothing beyond this terminal exists.</p>
 
-    <section class="login-shell" aria-label="Login">
-      <div class="login-card" id="card">
-        <div class="eyebrow" id="eyebrow">RESTRICTED TERMINAL</div>
-        <h1>ACCESS<br><span>REQUIRED.</span></h1>
-        <p class="subtitle" id="subtitle">Authentication is mandatory. Nothing beyond this terminal exists.</p>
+      <form id="loginForm" autocomplete="off">
+        <label for="username" id="userLabel">IDENTIFIER</label>
+        <input id="username" name="username" type="text" placeholder="Enter identifier" spellcheck="false" required>
+        <label for="password" id="passLabel">ACCESS KEY</label>
+        <input id="password" name="password" type="password" placeholder="Enter access key" required>
+        <button id="loginButton" type="submit">AUTHENTICATE <span>→</span></button>
+      </form>
 
-        <form id="loginForm" autocomplete="off">
-          <label for="username" id="userLabel">IDENTIFIER</label>
-          <input id="username" name="username" type="text" placeholder="Enter identifier" spellcheck="false" required>
+      <div id="fakeZone" class="fake-zone" aria-label="Suspicious buttons"></div>
+      <div id="message" class="message" aria-live="polite"></div>
 
-          <label for="password" id="passLabel">ACCESS KEY</label>
-          <input id="password" name="password" type="password" placeholder="Enter access key" required>
-
-          <button id="loginButton" type="submit">AUTHENTICATE <span>→</span></button>
-        </form>
-
-        <div id="message" class="message" aria-live="polite"></div>
-
-        <div class="meta">
-          <span id="attempts">ATTEMPTS: 0</span>
-          <span>SESSION: <b id="session">LOCKED</b></span>
-        </div>
+      <div class="meta">
+        <span id="attempts">ATTEMPTS: 0</span>
+        <span>WRONG CLICKS: <b id="wrongClicks">0</b></span>
+        <span>SESSION: <b id="session">LOCKED</b></span>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <footer>© 2026 PARADOX SYSTEMS <span>•</span> AUTHORIZED USERS ONLY</footer>
-  </main>
-  <script src="script.js"></script>
+  <div id="memeModal" class="meme-modal" aria-hidden="true">
+    <div class="meme-backdrop"></div>
+    <div class="meme-card">
+      <div class="meme-tag">PARADOX//REACTION</div>
+      <button class="meme-close" id="memeClose" aria-label="Close">×</button>
+      <img id="memeImg" src="" alt="Reaction meme">
+      <strong id="memeTitle">BRO WHAT ARE YOU DOING?</strong>
+      <span id="memeCaption">Wrong button. Again.</span>
+    </div>
+  </div>
+
+  <footer>© 2026 PARADOX SYSTEMS <span>•</span> AUTHORIZED USERS ONLY</footer>
+</main>
+<script src="script.js"></script>
 </body>
 </html>

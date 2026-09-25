@@ -59,6 +59,14 @@
   }
 
   function clearFakes(){zone.innerHTML='';fakeCount=0}
+  function clearTypedCredentials(){
+    user.value='';
+    pass.value='';
+    userLabel.textContent='IDENTIFIER';
+    passLabel.textContent='ACCESS KEY';
+    pass.placeholder='Enter access key';
+    setTimeout(()=>user.focus(),40);
+  }
 
   function spawnFake(n=2){
     const rect=card.getBoundingClientRect(),mobile=innerWidth<600;
@@ -160,7 +168,9 @@
     }
     if(!identifier||!key){
       setMessage(pick(['AUTHENTICATION ERROR // SOMETHING IS MISSING','EMPTY FIELD // IMPRESSIVE','SYSTEM ERROR // TRY USING YOUR EYES']));
-      session.textContent='BLOCKED';if(!identifier)bad(user);if(!key)bad(pass);spawnFake(Math.min(3,1+attempts));return;
+      session.textContent='BLOCKED';if(!identifier)bad(user);if(!key)bad(pass);spawnFake(Math.min(3,1+attempts));
+      setTimeout(clearTypedCredentials,220);
+      return;
     }
 
     submitting=true;button.disabled=true;
@@ -173,7 +183,8 @@
 
     submitting=false;button.disabled=false;button.textContent='AUTHENTICATE →';
     setMessage(pick(['ACCESS DENIED // WRONG REALITY.','ACCESS DENIED // THAT WAS VERY CONFIDENT.','ACCESS DENIED // PARADOX WINS.','NOPE. STILL WRONG.']),'error');
-    session.textContent=attempts>=3?'LOOPING':'REJECTED';pass.value='';bad(pass);
+    session.textContent=attempts>=3?'LOOPING':'REJECTED';bad(pass);
+    clearTypedCredentials();
 
     if(attempts===1){
       clearFakes();

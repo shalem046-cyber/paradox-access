@@ -11,11 +11,28 @@
   const CREATOR_KEY='PX//7F-ACCESS';
   const pick=a=>a[Math.floor(Math.random()*a.length)];
   const memes=[
-    {src:'assets/cat-reaction.svg',title:'BRO WHAT ARE YOU DOING?',caption:'You clicked the fake button. On purpose.'},
-    {src:'assets/dog-reaction.svg',title:'AYYO 😭',caption:'The real button was literally right there.'}
+    {src:'assets/memes/reaction-1.jpg',fallback:'assets/cat-reaction.svg',title:'BRO WHAT ARE YOU DOING?',caption:'You clicked the fake button. On purpose.'},
+    {src:'assets/memes/reaction-2.jpg',fallback:'assets/dog-reaction.svg',title:'AYYO 😭',caption:'The real button was literally right there.'}
   ];
-  const fakeLabels=['CONTINUE','I AM HUMAN','VERIFY','LOGIN','UNLOCK','ACCESS','SKIP','YES','REAL LOGIN','CONFIRM'];
-  const fakeMessages=['That button looked real, right?','WRONG BUTTON 😭','Bro clicked the decoy.','The system saw that.','You trusted THIS?'];
+  const roastLines=[
+    'BRO… THE BUTTON WAS NOT THAT HARD TO FIND 😭',
+    'You have defeated absolutely nothing. Congratulations.',
+    'That was a decoy. Your confidence is impressive though.',
+    'PARADOX//ACCESS: watching you make the same mistake again.',
+    'You clicked it. The terminal has receipts.',
+    'Please stop helping the fake buttons.',
+    'At this point the login page is playing against you.',
+    'Wrong button. Again. This is becoming a tradition.',
+    'The interface is not broken. Your decision-making is being tested.',
+    'You are currently losing an argument with a website.',
+    'System note: user continues to press suspicious rectangles.',
+    'Architect somewhere is probably laughing right now.',
+    'Nope. Not that one either. 😭',
+    'You saw a glowing button and immediately trusted it. Incredible.',
+    'The decoy has more wins than you do.'
+  ];
+  const fakeLabels=['CONTINUE','I AM HUMAN','VERIFY','LOGIN','UNLOCK','ACCESS','SKIP','YES','REAL LOGIN','CONFIRM','FIX ERROR','FREE ACCESS','CLICK ME','NOT A TRAP'];
+  const fakeMessages=roastLines;
 
   function setMessage(t,type='error'){message.className='message '+type;message.textContent=t}
   function glitch(){card.classList.remove('glitch');void card.offsetWidth;card.classList.add('glitch')}
@@ -27,8 +44,9 @@
 
   function showMeme(){
     const m=memes[(wrong-1)%memes.length];
+    memeImg.onerror=()=>{memeImg.onerror=null;memeImg.src=m.fallback};
     memeImg.src=m.src;
-    memeTitle.textContent=m.title;
+    memeTitle.textContent=pick([m.title,...roastLines.slice(0,6)]);
     memeCaption.textContent=wrong<3?m.caption:pick([
       'You have officially lost to a login page.',
       'The decoys are now bullying you.',
@@ -50,12 +68,35 @@
       const left=Math.max(8,Math.min(rect.width-110,Math.random()*(rect.width-120)));
       const top=Math.max(125,Math.min(rect.height-70,Math.random()*(rect.height-175)));
       b.style.left=left+'px';b.style.top=top+'px';
+      const dodge=()=>{
+        if(creatorUnlocked||submitting)return;
+        const r=card.getBoundingClientRect();
+        const maxX=Math.max(12,card.clientWidth-b.offsetWidth-12);
+        const maxY=Math.max(145,card.clientHeight-b.offsetHeight-18);
+        let nx=Math.random()*maxX,ny=125+Math.random()*Math.max(20,maxY-125);
+        const currentX=parseFloat(b.style.left)||0,currentY=parseFloat(b.style.top)||0;
+        if(Math.hypot(nx-currentX,ny-currentY)<90){nx=Math.min(maxX,currentX+120);ny=Math.min(maxY,currentY+65);}
+        b.style.left=nx+'px';b.style.top=ny+'px';
+        b.classList.remove('jump');void b.offsetWidth;b.classList.add('jump');
+        setMessage(pick([
+          'NOPE. YOU ALMOST GOT IT 😭',
+          'TOO SLOW.',
+          'NICE TRY. WRONG BUTTON.',
+          'BRO THOUGHT IT COULD CLICK ME.',
+          'THE BUTTON SAID “RUN.”',
+          'WHY ARE YOU CHASING THE DECOY?',
+          'MISSED. AGAIN. 😭'
+        ]),'warn');
+        systemStatus.textContent='DECOY EVASION ACTIVE';
+      };
+      b.addEventListener('mouseenter',()=>{if(innerWidth>=600)dodge()});
+      b.addEventListener('touchstart',e=>{e.preventDefault();dodge()},{passive:false});
       b.addEventListener('click',()=>{
         wrong++;update();showMeme();
         setMessage(pick(fakeMessages),'warn');systemStatus.textContent='SYSTEM MOCKING YOU';
         b.remove();fakeCount--;
-        if(wrong%2===0)spawnFake(2);
-        if(wrong>=4)subtitle.textContent='There are fake buttons everywhere now. Choose wisely.';
+        if(wrong%2===0)spawnFake(Math.min(3,1+Math.floor(wrong/3)));
+        if(wrong>=4)subtitle.textContent='There are fake buttons everywhere now. And yes, they are avoiding you.';
       });
       if(mobile)b.style.minWidth='74px';
       zone.appendChild(b);fakeCount++;
@@ -146,10 +187,17 @@
       subtitle.textContent='Five buttons. One real control. Probably.';
     }else{
       clearFakes();
-      spawnFake(Math.min(8,5+attempts-2));
+      spawnFake(Math.min(12,6+attempts-2));
       moveRealButton();
       systemStatus.textContent='SYSTEM: ENJOYING THIS';
-      subtitle.textContent='The interface is getting worse. You are still clicking.';
+      subtitle.textContent=pick([
+        'The interface is getting worse. You are still clicking.',
+        'More decoys deployed. You keep volunteering for this.',
+        'Congratulations. You unlocked the annoying version.',
+        'The terminal has run out of patience. Apparently you have not.',
+        'You could stop. You have chosen not to. Fascinating.'
+      ]);
+      setMessage(pick(roastLines),'error');
       if(attempts>=4)eyebrow.textContent='RESTRICTED TERMINAL // ABSOLUTELY NOT';
     }
   });

@@ -37,6 +37,11 @@
   function setMessage(t,type='error'){message.className='message '+type;message.textContent=t}
   function glitch(){card.classList.remove('glitch');void card.offsetWidth;card.classList.add('glitch')}
   function bad(el){el.classList.remove('bad');void el.offsetWidth;el.classList.add('bad');setTimeout(()=>el.classList.remove('bad'),700)}
+  function jumpField(el){
+    if(creatorUnlocked||submitting)return;
+    el.classList.remove('field-jump');void el.offsetWidth;el.classList.add('field-jump');
+    setTimeout(()=>el.classList.remove('field-jump'),520);
+  }
   function update(){attemptsEl.textContent='ATTEMPTS: '+attempts;wrongEl.textContent=wrong}
   function closeMeme(){modal.classList.remove('show');modal.setAttribute('aria-hidden','true')}
   memeClose.addEventListener('click',closeMeme);
@@ -125,12 +130,18 @@
     if(d<70)moveRealButton();
   });
 
+  user.addEventListener('focus',()=>{if(attempts>=1)jumpField(user)});
+  pass.addEventListener('focus',()=>{if(attempts>=1)jumpField(pass)});
   user.addEventListener('input',()=>{
+    if(attempts>=1&&Math.random()<0.22)jumpField(user);
     if(user.value.length===4){userLabel.textContent='IDENTIFIER (KEEP GOING...)';subtitle.textContent='The terminal has noticed you. That was a mistake.'}
     if(user.value.length===8)userLabel.textContent='IDENTIFIER (STILL WRONG)';
   });
   pass.addEventListener('focus',()=>{pass.placeholder=pick(['Enter access key','No, the other one','You know the password','This field is judging you'])});
-  pass.addEventListener('input',()=>{if(pass.value.length===5){passLabel.textContent='ACCESS KEY (SERIOUSLY?)';bad(pass)}});
+  pass.addEventListener('input',()=>{
+    if(attempts>=1&&Math.random()<0.22)jumpField(pass);
+    if(pass.value.length===5){passLabel.textContent='ACCESS KEY (SERIOUSLY?)';bad(pass)}
+  });
   pass.addEventListener('keydown',e=>{if(e.getModifierState&&e.getModifierState('CapsLock'))setMessage('CAPS LOCK DETECTED // OF COURSE','warn')});
 
   function grantAccess(){
@@ -168,7 +179,7 @@
     }
     if(!identifier||!key){
       setMessage(pick(['AUTHENTICATION ERROR // SOMETHING IS MISSING','EMPTY FIELD // IMPRESSIVE','SYSTEM ERROR // TRY USING YOUR EYES']));
-      session.textContent='BLOCKED';if(!identifier)bad(user);if(!key)bad(pass);spawnFake(Math.min(3,1+attempts));
+      session.textContent='BLOCKED';if(!identifier)bad(user);if(!key)bad(pass);jumpField(user);jumpField(pass);spawnFake(Math.min(3,1+attempts));
       setTimeout(clearTypedCredentials,220);
       return;
     }
@@ -184,6 +195,7 @@
     submitting=false;button.disabled=false;button.textContent='AUTHENTICATE →';
     setMessage(pick(['ACCESS DENIED // WRONG REALITY.','ACCESS DENIED // THAT WAS VERY CONFIDENT.','ACCESS DENIED // PARADOX WINS.','NOPE. STILL WRONG.']),'error');
     session.textContent=attempts>=3?'LOOPING':'REJECTED';bad(pass);
+    jumpField(user);jumpField(pass);
     clearTypedCredentials();
 
     if(attempts===1){

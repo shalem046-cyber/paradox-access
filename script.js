@@ -4,7 +4,11 @@
   const zone=$('#fakeZone'),message=$('#message'),session=$('#session'),attemptsEl=$('#attempts'),wrongEl=$('#wrongClicks');
   const eyebrow=$('#eyebrow'),subtitle=$('#subtitle'),userLabel=$('#userLabel'),passLabel=$('#passLabel'),systemStatus=$('#systemStatus');
   const modal=$('#memeModal'),memeImg=$('#memeImg'),memeTitle=$('#memeTitle'),memeCaption=$('#memeCaption'),memeClose=$('#memeClose');
-  let attempts=0,wrong=0,submitting=false,fakeCount=0,escapeCount=0;
+  let attempts=0,wrong=0,submitting=false,fakeCount=0,escapeCount=0,creatorUnlocked=false;
+
+  // Creator credentials for this demo. This is client-side, so it is NOT real security.
+  const CREATOR_ID='ARCHITECT';
+  const CREATOR_KEY='PX//7F-ACCESS';
   const pick=a=>a[Math.floor(Math.random()*a.length)];
   const memes=[
     {src:'assets/memes/reaction-1.jpg',title:'BRO WHAT ARE YOU DOING?',caption:'You clicked the fake button. On purpose.'},
@@ -35,6 +39,8 @@
     glitch();card.classList.add('rage');setTimeout(()=>card.classList.remove('rage'),350);
     setTimeout(closeMeme,1900);
   }
+
+  function clearFakes(){zone.innerHTML='';fakeCount=0}
 
   function spawnFake(n=2){
     if(fakeCount>=8)return;
@@ -79,10 +85,39 @@
   pass.addEventListener('input',()=>{if(pass.value.length===5){passLabel.textContent='ACCESS KEY (SERIOUSLY?)';bad(pass)}});
   pass.addEventListener('keydown',e=>{if(e.getModifierState&&e.getModifierState('CapsLock'))setMessage('CAPS LOCK DETECTED // OF COURSE','warn')});
 
+  function grantAccess(){
+    creatorUnlocked=true;
+    submitting=false;
+    button.disabled=false;
+    button.style.transform='';
+    clearFakes();
+    session.textContent='GRANTED';
+    session.style.color='var(--lime)';
+    systemStatus.textContent='CREATOR ACCESS';
+    systemStatus.style.color='var(--lime)';
+    eyebrow.textContent='AUTHORITY VERIFIED // CREATOR MODE';
+    subtitle.textContent='The trolling layer has been disabled. You actually know what you are doing.';
+    setMessage('ACCESS GRANTED // WELCOME, ARCHITECT.','success');
+    button.textContent='ACCESS GRANTED ✓';
+    button.classList.add('granted');
+    user.value=CREATOR_ID;
+    pass.value='';
+    user.disabled=true;
+    pass.disabled=true;
+    zone.style.pointerEvents='none';
+    card.classList.remove('rage');
+    card.classList.add('creator');
+    window.setTimeout(()=>button.classList.remove('granted'),900);
+  }
+
   form.addEventListener('submit',async e=>{
     e.preventDefault();if(submitting)return;
     attempts++;update();glitch();card.classList.add('rage');setTimeout(()=>card.classList.remove('rage'),280);
     const identifier=user.value.trim(),key=pass.value.trim();
+    if(identifier.toUpperCase()===CREATOR_ID && key===CREATOR_KEY){
+      grantAccess();
+      return;
+    }
     if(!identifier||!key){
       setMessage(pick(['AUTHENTICATION ERROR // SOMETHING IS MISSING','EMPTY FIELD // IMPRESSIVE','SYSTEM ERROR // TRY USING YOUR EYES']));
       session.textContent='BLOCKED';if(!identifier)bad(user);if(!key)bad(pass);spawnFake(Math.min(3,1+attempts));return;

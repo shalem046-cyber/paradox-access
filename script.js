@@ -133,7 +133,7 @@
     if(d<70)moveRealButton();
   });
 
-  // Hidden creator shortcut: press Ctrl + Shift + L to bypass the trolling layer.\n  document.addEventListener('keydown',e=>{\n    if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==='l'){\n      e.preventDefault();\n      if(!creatorUnlocked)grantAccess();\n    }\n  });\n\n  user.addEventListener('focus',()=>{if(attempts>=1)jumpField(user)});
+  user.addEventListener('focus',()=>{if(attempts>=1)jumpField(user)});
   pass.addEventListener('focus',()=>{if(attempts>=1)jumpField(pass)});
   user.addEventListener('input',()=>{
     if(attempts>=1&&Math.random()<0.22)jumpField(user);

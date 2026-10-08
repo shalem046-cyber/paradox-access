@@ -4,11 +4,14 @@
   const zone=$('#fakeZone'),message=$('#message'),session=$('#session'),attemptsEl=$('#attempts'),wrongEl=$('#wrongClicks');
   const eyebrow=$('#eyebrow'),subtitle=$('#subtitle'),userLabel=$('#userLabel'),passLabel=$('#passLabel'),systemStatus=$('#systemStatus');
   const modal=$('#memeModal'),memeImg=$('#memeImg'),memeTitle=$('#memeTitle'),memeCaption=$('#memeCaption'),memeClose=$('#memeClose');
+  const adminOverlay=$('#adminOverlay'),adminClose=$('#adminClose'),adminExit=$('#adminExit'),adminReset=$('#adminReset');
+  const adminAttempts=$('#adminAttempts'),adminClicks=$('#adminClicks');
   let attempts=0,wrong=0,submitting=false,fakeCount=0,escapeCount=0,creatorUnlocked=false;
 
-  // Creator credentials for this demo. This is client-side, so it is NOT real security.
+  // Puzzle-grade authentication: the secret itself is never stored in the frontend.
+  // This is still NOT production security because a public client can be inspected or bypassed.
   const CREATOR_ID='ARCHITECT';
-  const CREATOR_KEY='PX//7F-ACCESS';
+  const ADMIN_KEY_HASH='1c471a9db344715b4841b13c0fa56f3f15b27dfe9139b3d9153cc5af210eb43c';
   const pick=a=>a[Math.floor(Math.random()*a.length)];
   const memes=[
     {src:'assets/memes/reaction-1.jpg',fallback:'assets/cat-reaction.svg',title:'BRO WHAT ARE YOU DOING?',caption:'You clicked the fake button. On purpose.'},
@@ -144,6 +147,59 @@
   });
   pass.addEventListener('keydown',e=>{if(e.getModifierState&&e.getModifierState('CapsLock'))setMessage('CAPS LOCK DETECTED // OF COURSE','warn')});
 
+  async function verifyAdminKey(value){
+    if(!window.crypto||!window.crypto.subtle)return false;
+    const data=new TextEncoder().encode(value);
+    const digest=await crypto.subtle.digest('SHA-256',data);
+    const hash=Array.from(new Uint8Array(digest)).map(v=>v.toString(16).padStart(2,'0')).join('');
+    return hash===ADMIN_KEY_HASH;
+  }
+
+  function showAdminConsole(){
+    adminAttempts.textContent=String(attempts);
+    adminClicks.textContent=String(wrong);
+    adminOverlay.classList.add('show');
+    adminOverlay.setAttribute('aria-hidden','false');
+    adminClose.focus();
+  }
+
+  function closeAdminConsole(){
+    adminOverlay.classList.remove('show');
+    adminOverlay.setAttribute('aria-hidden','true');
+  }
+
+  function rearmPuzzle(){
+    closeAdminConsole();
+    creatorUnlocked=false;
+    submitting=false;
+    attempts=0;wrong=0;escapeCount=0;
+    clearFakes();
+    button.disabled=false;
+    button.style.transform='';
+    button.classList.remove('granted');
+    button.textContent='AUTHENTICATE →';
+    user.disabled=false;pass.disabled=false;
+    session.textContent='LOCKED';
+    session.style.color='';
+    systemStatus.textContent='SYSTEM ONLINE';
+    systemStatus.style.color='';
+    eyebrow.textContent='RESTRICTED TERMINAL';
+    subtitle.textContent='Authentication is mandatory. Nothing beyond this terminal exists.';
+    userLabel.textContent='IDENTIFIER';
+    passLabel.textContent='ACCESS KEY';
+    pass.placeholder='Enter access key';
+    card.classList.remove('creator','rage');
+    setMessage('PUZZLE REARMED // SESSION CLOSED.','success');
+    user.value='';pass.value='';
+    update();
+    setTimeout(()=>user.focus(),60);
+  }
+
+  adminClose.addEventListener('click',closeAdminConsole);
+  adminExit.addEventListener('click',rearmPuzzle);
+  adminReset.addEventListener('click',rearmPuzzle);
+  adminOverlay.addEventListener('click',e=>{if(e.target.classList.contains('admin-backdrop'))closeAdminConsole()});
+
   function grantAccess(){
     creatorUnlocked=true;
     submitting=false;
@@ -167,15 +223,22 @@
     card.classList.remove('rage');
     card.classList.add('creator');
     window.setTimeout(()=>button.classList.remove('granted'),900);
+    window.setTimeout(showAdminConsole,420);
   }
 
   form.addEventListener('submit',async e=>{
     e.preventDefault();if(submitting)return;
     attempts++;update();glitch();card.classList.add('rage');setTimeout(()=>card.classList.remove('rage'),280);
     const identifier=user.value.trim(),key=pass.value.trim();
-    if(identifier.toUpperCase()===CREATOR_ID && key===CREATOR_KEY){
-      grantAccess();
-      return;
+    if(identifier.toUpperCase()===CREATOR_ID){
+      const verified=await verifyAdminKey(key);
+      if(verified){
+        grantAccess();
+        return;
+      }
+      setMessage('ARCHITECT KEY REJECTED // THE TERMINAL REMEMBERS.','error');
+      bad(pass);
+      jumpField(pass);
     }
     if(!identifier||!key){
       setMessage(pick(['AUTHENTICATION ERROR // SOMETHING IS MISSING','EMPTY FIELD // IMPRESSIVE','SYSTEM ERROR // TRY USING YOUR EYES']));

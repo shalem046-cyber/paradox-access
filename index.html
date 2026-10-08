@@ -32,6 +32,7 @@
 
       <div id="fakeZone" class="fake-zone" aria-label="Suspicious buttons"></div>
       <div id="message" class="message" aria-live="polite"></div>
+      <button id="requestAccess" class="request-access" type="button" hidden>REQUEST ACCESS <span>↗</span></button>
 
       <div class="meta">
         <span id="attempts">ATTEMPTS: 0</span>
@@ -41,6 +42,35 @@
     </div>
   </section>
 
+
+  <div id="adminLoginOverlay" class="admin-overlay" aria-hidden="true">
+    <div class="admin-backdrop"></div>
+    <section class="admin-panel admin-login-panel" role="dialog" aria-modal="true" aria-labelledby="adminLoginTitle">
+      <div class="admin-panel-top">
+        <div>
+          <span class="admin-kicker">PARADOX//AUTHORITY</span>
+          <h2 id="adminLoginTitle">ADMIN<br><span>ACCESS.</span></h2>
+        </div>
+        <button id="adminLoginClose" class="admin-close" type="button" aria-label="Close admin login">×</button>
+      </div>
+
+      <p class="admin-copy">Private creator access. This route is separate from the player authentication flow.</p>
+
+      <form id="adminLoginForm" class="admin-login-form" autocomplete="off">
+        <label for="adminId">ADMIN ID</label>
+        <input id="adminId" type="text" value="ARCHITECT" spellcheck="false" autocomplete="off">
+        <label for="adminKey">ADMIN KEY</label>
+        <input id="adminKey" type="password" placeholder="Enter private key" autocomplete="off">
+        <button class="admin-action primary" type="submit">ENTER ADMIN <span>→</span></button>
+        <div id="adminLoginMessage" class="admin-login-message" aria-live="polite"></div>
+      </form>
+
+      <div class="admin-note">
+        <span class="admin-dot"></span>
+        <span>CREATOR ROUTE • DEMO / GAME CONTROL</span>
+      </div>
+    </section>
+  </div>
 
   <div id="adminOverlay" class="admin-overlay" aria-hidden="true">
     <div class="admin-backdrop"></div>
@@ -73,6 +103,25 @@
     </section>
   </div>
 
+  <div id="accessOverlay" class="admin-overlay" aria-hidden="true">
+    <div class="admin-backdrop"></div>
+    <section class="admin-panel access-panel" role="dialog" aria-modal="true" aria-labelledby="accessTitle">
+      <div class="admin-panel-top">
+        <div>
+          <span class="admin-kicker">PARADOX//RECOVERY</span>
+          <h2 id="accessTitle">PLAYER<br><span>ACCESS.</span></h2>
+        </div>
+        <button id="accessClose" class="admin-close" type="button" aria-label="Close access dialog">×</button>
+      </div>
+      <p class="admin-copy">The terminal is frustrated too. Use the demo access provided by the system to continue.</p>
+      <div class="access-credentials">
+        <div><span>ACCESS ID</span><strong>GUEST</strong></div>
+        <div><span>PASSCODE</span><strong>PARADOX</strong></div>
+      </div>
+      <button id="accessFill" class="admin-action primary" type="button">USE DEMO ACCESS <span>→</span></button>
+    </section>
+  </div>
+
   <div id="memeModal" class="meme-modal" aria-hidden="true">
     <div class="meme-backdrop"></div>
     <div class="meme-card">
@@ -84,7 +133,11 @@
     </div>
   </div>
 
-  <footer>© 2026 PARADOX SYSTEMS <span>•</span> AUTHORIZED USERS ONLY</footer>
+  <footer>
+    <span>© 2026 PARADOX SYSTEMS</span>
+    <span>•</span>
+    <button id="adminLauncher" class="admin-launcher" type="button">ADMIN</button>
+  </footer>
 </main>
 <script src="script.js"></script>
 </body>

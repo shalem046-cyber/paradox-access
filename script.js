@@ -4,14 +4,17 @@
   const zone=$('#fakeZone'),message=$('#message'),session=$('#session'),attemptsEl=$('#attempts'),wrongEl=$('#wrongClicks');
   const eyebrow=$('#eyebrow'),subtitle=$('#subtitle'),userLabel=$('#userLabel'),passLabel=$('#passLabel'),systemStatus=$('#systemStatus');
   const modal=$('#memeModal'),memeImg=$('#memeImg'),memeTitle=$('#memeTitle'),memeCaption=$('#memeCaption'),memeClose=$('#memeClose');
+  const requestAccess=$('#requestAccess'),accessOverlay=$('#accessOverlay'),accessClose=$('#accessClose'),accessFill=$('#accessFill');
+  const adminLauncher=$('#adminLauncher'),adminLoginOverlay=$('#adminLoginOverlay'),adminLoginClose=$('#adminLoginClose');
+  const adminLoginForm=$('#adminLoginForm'),adminId=$('#adminId'),adminKey=$('#adminKey'),adminLoginMessage=$('#adminLoginMessage');
   const adminOverlay=$('#adminOverlay'),adminClose=$('#adminClose'),adminExit=$('#adminExit'),adminReset=$('#adminReset');
   const adminAttempts=$('#adminAttempts'),adminClicks=$('#adminClicks');
   let attempts=0,wrong=0,submitting=false,fakeCount=0,escapeCount=0,creatorUnlocked=false;
 
-  // Puzzle-grade authentication: the secret itself is never stored in the frontend.
-  // This is still NOT production security because a public client can be inspected or bypassed.
-  const CREATOR_ID='ARCHITECT';
-  const ADMIN_KEY_HASH='1c471a9db344715b4841b13c0fa56f3f15b27dfe9139b3d9153cc5af210eb43c';
+  // Puzzle-grade creator authentication. The plaintext key is never stored in the repository.
+  // This remains demo/game authentication, not production security.
+  const ADMIN_ID='ARCHITECT';
+  const ADMIN_KEY_HASH='736d66dd9ce740391d43d54ab11eb7cf655fb71fa774111e59bda61588ceac2b';
   const pick=a=>a[Math.floor(Math.random()*a.length)];
   const memes=[
     {src:'assets/memes/reaction-1.jpg',fallback:'assets/cat-reaction.svg',title:'BRO WHAT ARE YOU DOING?',caption:'You clicked the fake button. On purpose.'},
@@ -47,6 +50,8 @@
   }
   function update(){attemptsEl.textContent='ATTEMPTS: '+attempts;wrongEl.textContent=wrong}
   function closeMeme(){modal.classList.remove('show');modal.setAttribute('aria-hidden','true')}
+  function closeOverlay(el){el.classList.remove('show');el.setAttribute('aria-hidden','true')}
+  function openOverlay(el){el.classList.add('show');el.setAttribute('aria-hidden','false')}
   memeClose.addEventListener('click',closeMeme);
   modal.addEventListener('click',e=>{if(e.target.classList.contains('meme-backdrop'))closeMeme()});
 
@@ -158,15 +163,51 @@
   function showAdminConsole(){
     adminAttempts.textContent=String(attempts);
     adminClicks.textContent=String(wrong);
-    adminOverlay.classList.add('show');
-    adminOverlay.setAttribute('aria-hidden','false');
+    openOverlay(adminOverlay);
     adminClose.focus();
   }
 
-  function closeAdminConsole(){
-    adminOverlay.classList.remove('show');
-    adminOverlay.setAttribute('aria-hidden','true');
+  function openAdminLogin(){
+    adminLoginMessage.textContent='';
+    adminKey.value='';
+    openOverlay(adminLoginOverlay);
+    setTimeout(()=>adminKey.focus(),50);
   }
+
+  function closeAdminLogin(){closeOverlay(adminLoginOverlay)}
+  function openAccessRecovery(){openOverlay(accessOverlay)}
+  function closeAccessRecovery(){closeOverlay(accessOverlay)}
+
+  adminLauncher.addEventListener('click',openAdminLogin);
+  adminLoginClose.addEventListener('click',closeAdminLogin);
+  accessClose.addEventListener('click',closeAccessRecovery);
+  accessOverlay.addEventListener('click',e=>{if(e.target.classList.contains('admin-backdrop'))closeAccessRecovery()});
+  adminLoginOverlay.addEventListener('click',e=>{if(e.target.classList.contains('admin-backdrop'))closeAdminLogin()});
+
+  adminLoginForm.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const id=adminId.value.trim().toUpperCase();
+    const key=adminKey.value;
+    adminLoginMessage.textContent='VERIFYING CREATOR ACCESS...';
+    if(id===ADMIN_ID && await verifyAdminKey(key)){
+      creatorUnlocked=true;
+      closeAdminLogin();
+      grantAccess();
+      return;
+    }
+    adminLoginMessage.textContent='ACCESS DENIED // INVALID ADMIN CREDENTIALS.';
+    adminKey.select();
+  });
+
+  accessFill.addEventListener('click',()=>{
+    user.value='GUEST';
+    pass.value='PARADOX';
+    closeAccessRecovery();
+    setMessage('DEMO ACCESS LOADED // AUTHENTICATE TO CONTINUE.','success');
+    setTimeout(()=>button.focus(),60);
+  });
+
+  function closeAdminConsole(){closeOverlay(adminOverlay)}
 
   function rearmPuzzle(){
     closeAdminConsole();
@@ -181,6 +222,7 @@
     user.disabled=false;pass.disabled=false;
     session.textContent='LOCKED';
     session.style.color='';
+    requestAccess.hidden=true;
     systemStatus.textContent='SYSTEM ONLINE';
     systemStatus.style.color='';
     eyebrow.textContent='RESTRICTED TERMINAL';
@@ -215,7 +257,7 @@
     setMessage('ACCESS GRANTED // WELCOME, ARCHITECT.','success');
     button.textContent='ACCESS GRANTED ✓';
     button.classList.add('granted');
-    user.value=CREATOR_ID;
+    user.value=ADMIN_ID;
     pass.value='';
     user.disabled=true;
     pass.disabled=true;
@@ -230,16 +272,27 @@
     e.preventDefault();if(submitting)return;
     attempts++;update();glitch();card.classList.add('rage');setTimeout(()=>card.classList.remove('rage'),280);
     const identifier=user.value.trim(),key=pass.value.trim();
-    if(identifier.toUpperCase()===CREATOR_ID){
-      const verified=await verifyAdminKey(key);
-      if(verified){
-        grantAccess();
-        return;
-      }
-      setMessage('ARCHITECT KEY REJECTED // THE TERMINAL REMEMBERS.','error');
-      bad(pass);
-      jumpField(pass);
+
+    if(identifier.toUpperCase()==='GUEST' && key.toUpperCase()==='PARADOX'){
+      creatorUnlocked=false;
+      submitting=false;
+      clearFakes();
+      button.disabled=false;
+      button.style.transform='';
+      button.classList.remove('granted');
+      session.textContent='GRANTED';
+      session.style.color='var(--lime)';
+      systemStatus.textContent='PLAYER ACCESS';
+      systemStatus.style.color='var(--lime)';
+      eyebrow.textContent='ACCESS VERIFIED';
+      subtitle.textContent='Welcome to PARADOX//ACCESS. The terminal approves... for now.';
+      setMessage('ACCESS GRANTED // WELCOME, GUEST.','success');
+      button.textContent='ACCESS GRANTED ✓';
+      button.classList.add('granted');
+      window.setTimeout(()=>button.classList.remove('granted'),900);
+      return;
     }
+
     if(!identifier||!key){
       setMessage(pick(['AUTHENTICATION ERROR // SOMETHING IS MISSING','EMPTY FIELD // IMPRESSIVE','SYSTEM ERROR // TRY USING YOUR EYES']));
       session.textContent='BLOCKED';if(!identifier)bad(user);if(!key)bad(pass);jumpField(user);jumpField(pass);spawnFake(Math.min(3,1+attempts));
@@ -274,6 +327,7 @@
     }else{
       clearFakes();
       spawnFake(Math.min(12,6+attempts-2));
+      if(attempts>=2)requestAccess.hidden=false;
       moveRealButton();
       systemStatus.textContent='SYSTEM: ENJOYING THIS';
       subtitle.textContent=pick([

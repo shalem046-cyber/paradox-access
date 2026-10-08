@@ -10,17 +10,27 @@ The login is intentionally easy to enter for normal players, while repeated wron
 
 ## Access modes
 
-The public login is intentionally frustrating and functions as a game mechanic.
+The public login is the player experience. After repeated failed attempts, a recovery option provides the demo credentials so the experience remains frustrating without becoming unfair.
 
-### Creator / admin mode
+### Player demo access
 
-Sign in directly on the same terminal with the creator identity `ARCHITECT` and the private access key configured as a SHA-256 hash in `script.js`.
+Access ID: `GUEST`  
+Passcode: `PARADOX`
 
-The plaintext key is intentionally not stored in the repository. Keep the actual key private and rotate the hash when changing it.
+### Creator / admin access
 
-Successful creator authentication opens the Architect Console, where the puzzle can be rearmed or the creator session can be ended.
+Admin access is deliberately separated from the player login.
 
-> Important: this is puzzle-grade authentication, not production security. A public frontend can always be inspected or modified by a determined player. For real admin protection, move verification to a server/API with a secret environment variable.
+Use the small **ADMIN** control in the footer:
+
+- Admin ID: `ARCHITECT`
+- Admin key: private creator key
+- Successful authentication opens the **Architect Console**
+
+The plaintext admin key is not stored in the repository; only a SHA-256 hash is used by the demo frontend.
+
+> Important: this is puzzle/game authentication, not production security. For real admin protection, verification should happen on a backend/API using a secret environment variable.
+
 ## Features
 
 - Responsive browser game UI

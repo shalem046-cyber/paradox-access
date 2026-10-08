@@ -33,3 +33,12 @@ footer{position:absolute;z-index:2;left:0;right:0;bottom:20px;text-align:center;
 .admin-note{margin-top:18px;display:flex;align-items:center;gap:8px;font:7px 'DM Mono',monospace;letter-spacing:.09em;color:#626975}.admin-dot{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px rgba(201,255,103,.7)}
 @keyframes adminIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
 @media(max-width:600px){.admin-panel{padding:24px 20px;border-radius:20px}.admin-status{grid-template-columns:1fr 1fr}.admin-actions{grid-template-columns:1fr}.admin-copy{font-size:12px}}
+
+.request-access{display:block;margin:10px auto 0;border:0;background:transparent;color:#7f8793;font:8px 'DM Mono',monospace;letter-spacing:.12em;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.request-access:hover{color:var(--lime)}.request-access span{margin-left:5px}
+footer{display:flex;align-items:center;justify-content:center;gap:7px}.admin-launcher{border:0;padding:0;background:transparent;color:#505660;font:inherit;letter-spacing:inherit;cursor:pointer}.admin-launcher:hover{color:var(--lime)}
+.admin-login-form{display:grid;gap:10px;margin-top:12px}.admin-login-form .admin-action{width:100%;margin-top:8px}.admin-login-message{min-height:18px;font:8px 'DM Mono',monospace;color:var(--danger);text-align:center}
+.access-credentials{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.access-credentials>div{padding:18px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}
+.access-credentials span{display:block;font:7px 'DM Mono',monospace;color:#6f7580;letter-spacing:.14em;margin-bottom:8px}.access-credentials strong{font:700 14px 'DM Mono',monospace;color:var(--lime)}
+.access-panel>.admin-action{width:100%}
+@media(max-width:600px){.access-credentials{grid-template-columns:1fr}.admin-launcher{font-size:7px}}
